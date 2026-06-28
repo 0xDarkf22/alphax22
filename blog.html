@@ -49,8 +49,6 @@
 <!-- ===== MAIN CONTENT ===== -->
 <main>
     <section class="section-container blog-page">
-
-        <!-- Page Header -->
         <div class="blog-page-header">
             <div class="blog-header-top">
                 <div>
@@ -65,8 +63,6 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Filter / Category Tabs -->
             <div class="blog-filters">
                 <button class="filter-btn active" data-filter="all">All</button>
                 <button class="filter-btn" data-filter="ctf">CTF</button>
@@ -76,25 +72,50 @@
                 <button class="filter-btn" data-filter="misc">Misc</button>
             </div>
         </div>
-
-        <!-- Posts Feed -->
         <div class="posts-feed" id="posts-feed">
-            <div class="loading-spinner" style="width:40px;height:40px;border:3px solid var(--border-color);border-top-color:var(--accent-color);border-radius:50%;animation:spin 0.7s linear infinite;margin:3rem auto;"></div>
+            <div class="loading-spinner"></div>
         </div>
-
     </section>
 </main>
 
-<!-- ===== FOOTER ===== -->
 <footer>
     <p>© 2026 AlphaX. All rights reserved.</p>
 </footer>
 
 <style>
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 3rem auto;
+}
 @keyframes spin { to { transform: rotate(360deg); } }
+.empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }
+.empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+.post-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; transition: border-color 0.3s; }
+.post-card:hover { border-color: var(--accent-color); }
+.post-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+.post-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-color); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
+.post-author { font-weight: 700; color: var(--text-main); font-size: 0.95rem; }
+.post-time { color: var(--text-muted); font-size: 0.8rem; }
+.post-category-tag { font-size: 0.7rem; padding: 0.15rem 0.6rem; border-radius: 12px; background: rgba(13,148,136,0.15); color: var(--accent-color); border: 1px solid rgba(13,148,136,0.2); }
+.post-title { font-size: 1.3rem; font-weight: 700; color: var(--text-main); margin: 0.5rem 0; cursor: pointer; }
+.post-title:hover { color: var(--accent-color); }
+.post-excerpt { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 0.75rem; }
+.post-image { border-radius: 12px; overflow: hidden; margin: 0.75rem 0; background: var(--bg-alt); cursor: pointer; }
+.post-image img { width: 100%; max-height: 500px; object-fit: cover; display: block; }
+.post-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.post-tag { font-size: 0.7rem; padding: 0.15rem 0.6rem; border-radius: 4px; background: rgba(13,148,136,0.08); color: var(--accent-color); border: 1px solid rgba(13,148,136,0.15); }
+.post-actions { display: flex; align-items: center; gap: 1.5rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color); margin-top: 0.75rem; }
+.post-actions button { background: none; border: none; color: var(--text-muted); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.8rem; border-radius: 8px; font-family: inherit; transition: background 0.2s, color 0.2s; }
+.post-actions button:hover { background: rgba(13,148,136,0.08); }
+.post-actions button.liked { color: #ef4444; }
+.post-actions button.liked i { color: #ef4444; }
 </style>
 
-<!-- FIREBASE SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
@@ -148,37 +169,30 @@ function buildPostCard(post, id) {
     const hasImage = post.imageUrl && post.imageUrl.trim() !== '';
 
     card.innerHTML = `
-        <div class="post-header" style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
-            <div class="post-avatar" style="width:44px;height:44px;border-radius:50%;background:var(--accent-color);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1rem;flex-shrink:0;">A</div>
+        <div class="post-header">
+            <div class="post-avatar">A</div>
             <div>
-                <div class="post-author" style="font-weight:700;color:var(--text-main);font-size:0.95rem;">AlphaX</div>
+                <div class="post-author">AlphaX</div>
                 <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-                    <span style="color:var(--text-muted);font-size:0.8rem;">${timeAgo(post.createdAt)}</span>
-                    <span style="font-size:0.7rem;padding:0.15rem 0.6rem;border-radius:12px;background:rgba(13,148,136,0.15);color:var(--accent-color);border:1px solid rgba(13,148,136,0.2);">${(post.category || 'misc').toUpperCase()}</span>
+                    <span class="post-time">${timeAgo(post.createdAt)}</span>
+                    <span class="post-category-tag">${(post.category || 'misc').toUpperCase()}</span>
                 </div>
             </div>
         </div>
-
-        <div class="post-title" style="font-size:1.3rem;font-weight:700;color:var(--text-main);margin:0.5rem 0;cursor:pointer;">${post.title}</div>
-
-        <div class="post-excerpt" style="color:var(--text-muted);font-size:0.95rem;line-height:1.6;margin-bottom:0.75rem;">${post.excerpt || post.content?.substring(0, 150) + '...' || ''}</div>
-
-        ${hasImage ? `<div class="post-image" style="border-radius:12px;overflow:hidden;margin:0.75rem 0;background:var(--bg-alt);cursor:pointer;"><img src="${post.image}" alt="${post.title}" style="width:100%;max-height:500px;object-fit:cover;display:block;" loading="lazy"></div>` : ''}
-
-        <div class="post-tags" style="display:flex;flex-wrap:wrap;gap:0.4rem;margin:0.5rem 0;">
-            ${(post.tags || []).map(t => `<span style="font-size:0.7rem;padding:0.15rem 0.6rem;border-radius:4px;background:rgba(13,148,136,0.08);color:var(--accent-color);border:1px solid rgba(13,148,136,0.15);">${t}</span>`).join('')}
-        </div>
-
-        <div class="post-actions" style="display:flex;align-items:center;gap:1.5rem;padding-top:0.75rem;border-top:1px solid var(--border-color);margin-top:0.75rem;">
-            <button class="like-btn ${isLiked ? 'liked' : ''}" style="background:none;border:none;color:var(--text-muted);font-size:0.9rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0.8rem;border-radius:8px;font-family:inherit;transition:background 0.2s,color 0.2s;" data-id="${id}">
+        <div class="post-title" data-id="${id}">${post.title}</div>
+        <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 150) + '...' || ''}</div>
+        ${hasImage ? `<div class="post-image" data-id="${id}"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
+        <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
+        <div class="post-actions">
+            <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
                 <i class="fa${isLiked ? 's' : 'r'} fa-heart"></i>
                 <span class="like-count">${post.likes || 0}</span>
             </button>
-            <button class="comment-btn" style="background:none;border:none;color:var(--text-muted);font-size:0.9rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0.8rem;border-radius:8px;font-family:inherit;transition:background 0.2s,color 0.2s;" data-id="${id}">
+            <button class="comment-btn" data-id="${id}">
                 <i class="far fa-comment"></i>
                 <span>${post.commentCount || 0}</span>
             </button>
-            <button class="share-btn" style="background:none;border:none;color:var(--text-muted);font-size:0.9rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0.8rem;border-radius:8px;font-family:inherit;transition:background 0.2s,color 0.2s;" data-id="${id}">
+            <button class="share-btn" data-id="${id}">
                 <i class="fas fa-share-alt"></i>
             </button>
         </div>
@@ -219,8 +233,7 @@ function buildPostCard(post, id) {
     });
 
     // ── Click on title or image → go to post ──
-    const titleEl = card.querySelector('.post-title');
-    titleEl.addEventListener('click', () => {
+    card.querySelector('.post-title').addEventListener('click', () => {
         window.location.href = `blog-post.html?id=${id}`;
     });
     const imgWrap = card.querySelector('.post-image');
@@ -236,15 +249,17 @@ function buildPostCard(post, id) {
 // ── LOAD POSTS ────────────────────────────────────────────────
 async function loadPosts() {
     try {
+        console.log("Loading posts from Firestore...");
         const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
         const snap = await getDocs(q);
+        console.log("Posts found:", snap.size);
 
         feed.innerHTML = '';
 
         if (snap.empty) {
             feed.innerHTML = `
-                <div class="empty-state" style="text-align:center;padding:4rem 2rem;color:var(--text-muted);">
-                    <i class="fas fa-terminal" style="font-size:3rem;margin-bottom:1rem;opacity:0.5;"></i>
+                <div class="empty-state">
+                    <i class="fas fa-terminal"></i>
                     <p>No posts yet. Check back soon.</p>
                 </div>
             `;
@@ -253,13 +268,14 @@ async function loadPosts() {
 
         snap.forEach(doc => {
             const post = doc.data();
+            console.log("Post title:", post.title);
             feed.appendChild(buildPostCard(post, doc.id));
         });
     } catch (err) {
-        console.error(err);
+        console.error("Error loading posts:", err.message);
         feed.innerHTML = `
-            <div class="empty-state" style="text-align:center;padding:4rem 2rem;color:var(--text-muted);">
-                <i class="fas fa-exclamation-triangle" style="font-size:3rem;margin-bottom:1rem;opacity:0.5;"></i>
+            <div class="empty-state">
+                <i class="fas fa-exclamation-triangle"></i>
                 <p>Failed to load posts: ${err.message}</p>
             </div>
         `;
