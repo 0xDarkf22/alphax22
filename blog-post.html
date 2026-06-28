@@ -140,9 +140,6 @@
     }
 
     function renderPost(post, id) {
-        const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-        const isLiked = likedPosts.includes(id);
-
         content.innerHTML = `
             <a href="blog.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Blog</a>
             <div class="post-card">
@@ -151,8 +148,8 @@
                 <div class="post-meta">${post.category || 'Misc'} • ${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleDateString() : 'Unknown date'}</div>
                 <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
                 <div class="post-content">${post.content}</div>
-                <button class="like-btn ${isLiked ? 'liked' : ''}" id="like-btn" data-id="${id}">
-                    <i class="fa${isLiked ? 's' : 'r'} fa-heart"></i>
+                <button class="like-btn" id="like-btn" data-id="${id}">
+                    <i class="far fa-heart"></i>
                     <span id="like-count">${post.likes || 0}</span> Likes
                 </button>
             </div>
@@ -168,16 +165,33 @@
         `;
 
         // ── LIKE ──
-        document.getElementById('like-btn').addEventListener('click', async function() {
+        const likeBtn = document.getElementById('like-btn');
+        const likeCount = document.getElementById('like-count');
+        const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+        
+        // Check if already liked
+        if (likedPosts.includes(id)) {
+            likeBtn.classList.add('liked');
+            likeBtn.querySelector('i').className = 'fas fa-heart';
+        }
+
+        likeBtn.addEventListener('click', async function() {
             const id = this.dataset.id;
             const liked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-            if (liked.includes(id)) { alert('Already liked!'); return; }
+            if (liked.includes(id)) { 
+                alert('Already liked!'); 
+                return; 
+            }
             liked.push(id);
             localStorage.setItem('liked_posts', JSON.stringify(liked));
             this.classList.add('liked');
             this.querySelector('i').className = 'fas fa-heart';
+            
+            // Update display immediately
             const count = document.getElementById('like-count');
             count.textContent = parseInt(count.textContent) + 1;
+            
+            // Update Firestore
             await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
         });
 
