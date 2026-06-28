@@ -167,88 +167,34 @@
         // ── LIKE ──
         const likeBtn = document.getElementById('like-btn');
         const likeCount = document.getElementById('like-count');
-
-        // Load actual likes from Firestore
-        async function loadLikeCount() {
-            try {
-                const docRef = doc(db, 'posts', id);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    likeCount.textContent = data.likes || 0;
-                    console.log("🔍 Current likes from Firestore:", data.likes);
-                }
-            } catch (err) {
-                console.error("Error loading likes:", err);
-            }
+        const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+        
+        if (likedPosts.includes(id)) {
+            likeBtn.classList.add('liked');
+            likeBtn.querySelector('i').className = 'fas fa-heart';
         }
 
-        // Check if already liked using localStorage
-        async function checkIfLiked() {
-            const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-            if (likedPosts.includes(id)) {
-                likeBtn.classList.add('liked');
-                likeBtn.querySelector('i').className = 'fas fa-heart';
-                return true;
-            }
-            return false;
-        }
-
-        // Call on load
-        loadLikeCount();
-        checkIfLiked();
-
-        // Like button click
         likeBtn.addEventListener('click', async function() {
             const id = this.dataset.id;
-            const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+            const liked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
             
-            console.log("🔍 Clicked like for post:", id);
-            
-            // Check localStorage first
-            if (likedPosts.includes(id)) { 
-                console.log("⚠️ Already liked in localStorage");
+            if (liked.includes(id)) { 
                 alert('Already liked!'); 
                 return; 
             }
             
-            // Check Firestore for latest count
-            const docRef = doc(db, 'posts', id);
-            const docSnap = await getDoc(docRef);
-            const currentLikes = docSnap.exists() ? docSnap.data().likes || 0 : 0;
-            
-            console.log("🔍 Current likes in Firestore:", currentLikes);
-            
-            // Update localStorage
-            likedPosts.push(id);
-            localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
+            liked.push(id);
+            localStorage.setItem('liked_posts', JSON.stringify(liked));
             this.classList.add('liked');
             this.querySelector('i').className = 'fas fa-heart';
             
-            // Update display
-            const newCount = currentLikes + 1;
-            likeCount.textContent = newCount;
-            console.log("🔍 New like count:", newCount);
+            const count = document.getElementById('like-count');
+            count.textContent = parseInt(count.textContent) + 1;
             
             try {
-                await updateDoc(docRef, { likes: increment(1) });
-                console.log("✅ Firestore updated successfully!");
-                
-                // Verify the update
-                const updatedDoc = await getDoc(docRef);
-                console.log("🔍 Updated likes in Firestore:", updatedDoc.data().likes);
-                
+                await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
             } catch (err) {
-                console.error("❌ Error updating Firestore:", err);
-                alert('Failed to save like: ' + err.message);
-                // Revert
-                const revertLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-                const index = revertLiked.indexOf(id);
-                if (index > -1) revertLiked.splice(index, 1);
-                localStorage.setItem('liked_posts', JSON.stringify(revertLiked));
-                this.classList.remove('liked');
-                this.querySelector('i').className = 'far fa-heart';
-                likeCount.textContent = currentLikes;
+                console.error("Error:", err);
             }
         });
 
@@ -260,9 +206,17 @@
             this.disabled = true;
             this.textContent = 'Posting...';
             try {
+                // 1. Add the comment to the subcollection
                 await addDoc(collection(db, 'posts', id, 'comments'), {
                     name, text, createdAt: serverTimestamp()
                 });
+                
+                // 2. Increment the commentCount in the post document
+                await updateDoc(doc(db, 'posts', id), {
+                    commentCount: increment(1)
+                });
+                
+                console.log("✅ Comment added and count incremented");
                 document.getElementById('comment-text').value = '';
                 this.textContent = 'Post Comment';
                 this.disabled = false;
@@ -311,7 +265,7 @@
         const next = cur === 'dark' ? 'light' : 'dark';
         html.setAttribute('data-theme', next);
         localStorage.setItem('theme', next);
-        themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon</i>';
+        themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
     });
 
     document.getElementById('hamburger').addEventListener('click', () => {
