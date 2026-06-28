@@ -208,17 +208,18 @@
             this.disabled = true;
             this.textContent = 'Posting...';
             try {
-                // Add the comment
+                // 1. Add the comment to the subcollection
                 await addDoc(collection(db, 'posts', id, 'comments'), {
                     name, text, createdAt: serverTimestamp()
                 });
                 
-                // Update the comment count in the post
-                await updateDoc(doc(db, 'posts', id), {
+                // 2. Increment the commentCount in the post document
+                const postRef = doc(db, 'posts', id);
+                await updateDoc(postRef, {
                     commentCount: increment(1)
                 });
                 
-                console.log("✅ Comment added and count updated");
+                console.log("✅ Comment added and count incremented");
                 document.getElementById('comment-text').value = '';
                 this.textContent = 'Post Comment';
                 this.disabled = false;
