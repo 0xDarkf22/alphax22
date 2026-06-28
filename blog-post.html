@@ -178,10 +178,12 @@
         likeBtn.addEventListener('click', async function() {
             const id = this.dataset.id;
             const liked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+            
             if (liked.includes(id)) { 
                 alert('Already liked!'); 
                 return; 
             }
+            
             liked.push(id);
             localStorage.setItem('liked_posts', JSON.stringify(liked));
             this.classList.add('liked');
@@ -189,10 +191,24 @@
             
             // Update display immediately
             const count = document.getElementById('like-count');
-            count.textContent = parseInt(count.textContent) + 1;
+            const newCount = parseInt(count.textContent) + 1;
+            count.textContent = newCount;
             
-            // Update Firestore
-            await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
+            try {
+                await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
+                console.log("✅ Like saved to Firestore");
+            } catch (err) {
+                console.error("❌ Error saving like:", err);
+                alert('Failed to save like. Please try again.');
+                // Revert
+                const revertLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+                const index = revertLiked.indexOf(id);
+                if (index > -1) revertLiked.splice(index, 1);
+                localStorage.setItem('liked_posts', JSON.stringify(revertLiked));
+                this.classList.remove('liked');
+                this.querySelector('i').className = 'far fa-heart';
+                count.textContent = parseInt(count.textContent) - 1;
+            }
         });
 
         // ── COMMENT ──
