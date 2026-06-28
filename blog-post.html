@@ -169,6 +169,9 @@
         const likeCount = document.getElementById('like-count');
         const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
         
+        console.log("🔍 Post ID:", id);
+        console.log("🔍 Current likes in Firestore:", post.likes);
+
         // Check if already liked
         if (likedPosts.includes(id)) {
             likeBtn.classList.add('liked');
@@ -179,7 +182,10 @@
             const id = this.dataset.id;
             const liked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
             
+            console.log("🔍 Clicked like for post:", id);
+            
             if (liked.includes(id)) { 
+                console.log("⚠️ Already liked in localStorage");
                 alert('Already liked!'); 
                 return; 
             }
@@ -193,13 +199,20 @@
             const count = document.getElementById('like-count');
             const newCount = parseInt(count.textContent) + 1;
             count.textContent = newCount;
+            console.log("🔍 New like count:", newCount);
             
             try {
-                await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
-                console.log("✅ Like saved to Firestore");
+                const docRef = doc(db, 'posts', id);
+                await updateDoc(docRef, { likes: increment(1) });
+                console.log("✅ Firestore updated successfully!");
+                
+                // Verify the update
+                const updatedDoc = await getDoc(docRef);
+                console.log("🔍 Updated likes in Firestore:", updatedDoc.data().likes);
+                
             } catch (err) {
-                console.error("❌ Error saving like:", err);
-                alert('Failed to save like. Please try again.');
+                console.error("❌ Error updating Firestore:", err);
+                alert('Failed to save like: ' + err.message);
                 // Revert
                 const revertLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
                 const index = revertLiked.indexOf(id);
