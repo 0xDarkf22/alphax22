@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlphaX | Blog & Posts</title>
+    <meta name="description" content="Security research, CTF writeups, bug bounty insights and thoughts by AlphaX — Cybersecurity Researcher and Bug Bounty Hunter.">
+    <meta name="keywords" content="AlphaX, cybersecurity blog, CTF writeups, bug bounty, security research, penetration testing">
+    <meta name="author" content="AlphaX">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://alphax22.web.app/blog.html">
+    <meta property="og:title" content="AlphaX | Blog & Posts">
+    <meta property="og:description" content="Security research, CTF writeups and thoughts by AlphaX.">
+    <meta property="og:image" content="https://alphax22.web.app/assets/Banner.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="AlphaX | Blog & Posts">
+    <meta property="twitter:description" content="Security research, CTF writeups and thoughts by AlphaX.">
+    <meta property="twitter:image" content="https://alphax22.web.app/assets/Banner.png">
+    <link rel="canonical" href="https://alphax22.web.app/blog.html">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="blog.css">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+</head>
+<body>
+
+<!-- HEADER / NAV -->
+<header>
+    <nav class="nav-container">
+        <div class="logo"><a href="index.html">0xAlpha22</a></div>
+        <ul class="nav-links" id="nav-links">
+            <li><a href="index.html#home" class="nav-link">Home</a></li>
+            <li><a href="index.html#about" class="nav-link">About</a></li>
+            <li><a href="projects.html" class="nav-link">Projects</a></li>
+            <li><a href="https://alphalabs-22.web.app/index.html" class="nav-link">Writeups</a></li>
+            <li><a href="certificates.html" class="nav-link">Certificates</a></li>
+            <li><a href="blog.html" class="nav-link active">Blog</a></li>
+            <li><a href="resume.html" class="nav-link">Resume</a></li>
+            <li><a href="index.html#contact" class="nav-link">Contact</a></li>
+        </ul>
+        <div class="nav-actions">
+            <button id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-moon"></i></button>
+            <div class="hamburger" id="hamburger"><i class="fas fa-bars"></i></div>
+        </div>
+    </nav>
+</header>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main>
+    <section class="section-container blog-page">
+
+        <!-- Page Header -->
+        <div class="blog-page-header">
+            <div class="blog-header-top">
+                <div>
+                    <span class="code-tag">&lt;Blog /&gt;</span>
+                    <h1 class="blog-main-title">Posts & Research</h1>
+                    <p class="blog-subtitle">Security research, CTF insights, bug bounty notes and everything in between.</p>
+                </div>
+                <div class="blog-header-actions">
+                    <button class="btn-subscribe" id="subscribe-btn" title="Subscribe for notifications">
+                        <i class="fas fa-bell"></i>
+                        <span>Subscribe</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter / Category Tabs -->
+            <div class="blog-filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="ctf">CTF</button>
+                <button class="filter-btn" data-filter="bugbounty">Bug Bounty</button>
+                <button class="filter-btn" data-filter="research">Research</button>
+                <button class="filter-btn" data-filter="tools">Tools</button>
+                <button class="filter-btn" data-filter="misc">Misc</button>
+            </div>
+        </div>
+
+        <!-- Posts Feed -->
+        <div class="posts-feed" id="posts-feed">
+            <div class="loading-spinner" style="width:40px;height:40px;border:3px solid var(--border-color);border-top-color:var(--accent-color);border-radius:50%;animation:spin 0.7s linear infinite;margin:3rem auto;"></div>
+        </div>
+
+    </section>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+    <p>© 2026 AlphaX. All rights reserved.</p>
+</footer>
+
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+<!-- FIREBASE SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+    getFirestore,
+    collection,
+    query,
+    orderBy,
+    getDocs,
+    doc,
+    updateDoc,
+    increment
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ── YOUR FIREBASE CONFIG ─────────────────────────────────────
+const firebaseConfig = {
+    apiKey: "AIzaSyAeYGzHvgOC8mQGI-5dc16I9bBRez_LAcc",
+    authDomain: "alphaxt22.firebaseapp.com",
+    projectId: "alphaxt22",
+    storageBucket: "alphaxt22.firebasestorage.app",
+    messagingSenderId: "564241919435",
+    appId: "1:564241919435:web:a0146fd9a65f32a1125a4e",
+    measurementId: "G-F6GW3R1WMP"
+};
+// ─────────────────────────────────────────────────────────────
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const feed = document.getElementById('posts-feed');
+
+// ── TIME AGO ──────────────────────────────────────────────────
+function timeAgo(ts) {
+    if (!ts) return '';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    const diff = (Date.now() - d) / 1000;
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+    if (diff < 604800) return Math.floor(diff/86400) + 'd ago';
+    return d.toLocaleDateString();
+}
+
+// ── BUILD POST CARD ──────────────────────────────────────────
+function buildPostCard(post, id) {
+    const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+    const isLiked = likedPosts.includes(id);
+
+    const card = document.createElement('article');
+    card.className = 'post-card';
+
+    const hasImage = post.image && post.image.trim() !== '';
+
+    card.innerHTML = `
+        <div class="post-header" style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+            <div class="post-avatar" style="width:44px;height:44px;border-radius:50%;background:var(--accent-color);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1rem;flex-shrink:0;">A</div>
+            <div>
+                <div class="post-author" style="font-weight:700;color:var(--text-main);font-size:0.95rem;">AlphaX</div>
+                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+                    <span style="color:var(--text-muted);font-size:0.8rem;">${timeAgo(post.createdAt)}</span>
+                    <span style="font-size:0.7rem;padding:0.15rem 0.6rem;border-radius:12px;background:rgba(13,148,136,0.15);color:var(--accent-color);border:1px solid rgba(13,148,136,0.2);">${(post.category || 'misc').toUpperCase()}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="post-title" style="font-size:1.3rem;font-weight:700;color:var(--text-main);margin:0.5rem 0;cursor:pointer;">${post.title}</div>
+
+        <div class="post-excerpt" style="color:var(--text-muted);font-size:0.95rem;line-height:1.6;margin-bottom:0.75rem;">${post.excerpt || post.content?.substring(0, 150) + '...' || ''}</div>
+
+        ${hasImage ? `<div class="post-image" style="border-radius:12px;overflow:hidden;margin:0.75rem 0;background:var(--bg-alt);cursor:pointer;"><img src="${post.image}" alt="${post.title}" style="width:100%;max-height:500px;object-fit:cover;display:block;" loading="lazy"></div>` : ''}
+
+        <div class="post-tags" style="display:flex;flex-wrap:wrap;gap:0.4rem;margin:0.5rem 0;">
+            ${(post.tags || []).map(t => `<span style="font-size:0.7rem;padding:0.15rem 0.6rem;border-radius:4px;background:rgba(13,148,136,0.08);color:var(--accent-color);border:1px solid rgba(13,148,136,0.15);">${t}</span>`).join('')}
+        </div>
+
+        <div class="post-actions" style="display:flex;align-items:center;gap:1.5rem;padding-top:0.75rem;border-top:1px solid var(--border-color);margin-top:0.75rem;">
+            <button class="like-btn ${isLiked ? 'liked' : ''}" style="background:none;border:none;color:var(--text-muted);font-size:0.9rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0.8rem;border-radius:8px;font-family:inherit;transition:background 0.2s,color 0.2s;" data-id="${id}">
+                <i class="fa${isLiked ? 's' : 'r'} fa-heart"></i>
+                <span class="like-count">${post.likes || 0}</span>
+            </button>
+            <button class="comment-btn" style="background:none;border:none;color:var(--text-muted);font-size:0.9rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0.8rem;border-radius:8px;font-family:inherit;transition:background 0.2s,color 0.2s;" data-id="${id}">
+                <i class="far fa-comment"></i>
+                <span>${post.comments || 0}</span>
+            </button>
+            <button class="share-btn" style="background:none;border:none;color:var(--text-muted);font-size:0.9rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0.8rem;border-radius:8px;font-family:inherit;transition:background 0.2s,color 0.2s;" data-id="${id}">
+                <i class="fas fa-share-alt"></i>
+            </button>
+        </div>
+    `;
+
+    // ── Like ──
+    card.querySelector('.like-btn').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const btn = e.currentTarget;
+        const liked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+        if (liked.includes(id)) { return; }
+        liked.push(id);
+        localStorage.setItem('liked_posts', JSON.stringify(liked));
+        btn.classList.add('liked');
+        btn.querySelector('i').className = 'fas fa-heart';
+        const count = btn.querySelector('.like-count');
+        count.textContent = parseInt(count.textContent) + 1;
+        try {
+            await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
+        } catch {}
+    });
+
+    // ── Comment ──
+    card.querySelector('.comment-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.location.href = `blog-post.html?id=${id}`;
+    });
+
+    // ── Share ──
+    card.querySelector('.share-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const url = `https://alphax22.web.app/blog-post.html?id=${id}`;
+        if (navigator.share) {
+            navigator.share({ title: post.title, url });
+        } else {
+            navigator.clipboard.writeText(url).then(() => alert('Link copied!'));
+        }
+    });
+
+    // ── Click on title or image → go to post ──
+    const titleEl = card.querySelector('.post-title');
+    titleEl.addEventListener('click', () => {
+        window.location.href = `blog-post.html?id=${id}`;
+    });
+    const imgWrap = card.querySelector('.post-image');
+    if (imgWrap) {
+        imgWrap.addEventListener('click', () => {
+            window.location.href = `blog-post.html?id=${id}`;
+        });
+    }
+
+    return card;
+}
+
+// ── LOAD POSTS ────────────────────────────────────────────────
+async function loadPosts() {
+    try {
+        const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+        const snap = await getDocs(q);
+
+        feed.innerHTML = '';
+
+        if (snap.empty) {
+            feed.innerHTML = `
+                <div class="empty-state" style="text-align:center;padding:4rem 2rem;color:var(--text-muted);">
+                    <i class="fas fa-terminal" style="font-size:3rem;margin-bottom:1rem;opacity:0.5;"></i>
+                    <p>No posts yet. Check back soon.</p>
+                </div>
+            `;
+            return;
+        }
+
+        snap.forEach(doc => {
+            const post = doc.data();
+            feed.appendChild(buildPostCard(post, doc.id));
+        });
+    } catch (err) {
+        console.error(err);
+        feed.innerHTML = `
+            <div class="empty-state" style="text-align:center;padding:4rem 2rem;color:var(--text-muted);">
+                <i class="fas fa-exclamation-triangle" style="font-size:3rem;margin-bottom:1rem;opacity:0.5;"></i>
+                <p>Failed to load posts: ${err.message}</p>
+            </div>
+        `;
+    }
+}
+
+// ── SUBSCRIBE ──────────────────────────────────────────────────
+document.getElementById('subscribe-btn').addEventListener('click', function() {
+    if (Notification.permission === 'granted') {
+        alert('✅ Notifications already enabled!');
+    } else if (Notification.permission === 'denied') {
+        alert('❌ Notifications are blocked. Please enable in your browser settings.');
+    } else {
+        Notification.requestPermission().then(function(permission) {
+            if (permission === 'granted') {
+                alert('✅ Notifications enabled! You\'ll be notified of new posts.');
+            } else {
+                alert('❌ You declined notifications. You can enable them later in browser settings.');
+            }
+        });
+    }
+});
+
+// ── NAV / THEME ───────────────────────────────────────────────
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('nav-links');
+hamburger.addEventListener('click', () => navLinks.classList.toggle('active'));
+
+const themeToggle = document.getElementById('theme-toggle');
+const html = document.documentElement;
+const saved = localStorage.getItem('theme') || 'dark';
+html.setAttribute('data-theme', saved);
+themeToggle.innerHTML = saved === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+themeToggle.addEventListener('click', () => {
+    const cur = html.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+});
+
+// ── INIT ──────────────────────────────────────────────────────
+loadPosts();
+</script>
+</body>
+</html>
