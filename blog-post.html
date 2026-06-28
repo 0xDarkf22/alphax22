@@ -169,6 +169,10 @@
         const likeCount = document.getElementById('like-count');
         const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
         
+        console.log("🔍 Post ID:", id);
+        console.log("🔍 Current likes in Firestore:", post.likes);
+
+        // Check if already liked
         if (likedPosts.includes(id)) {
             likeBtn.classList.add('liked');
             likeBtn.querySelector('i').className = 'fas fa-heart';
@@ -178,7 +182,10 @@
             const id = this.dataset.id;
             const liked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
             
+            console.log("🔍 Clicked like for post:", id);
+            
             if (liked.includes(id)) { 
+                console.log("⚠️ Already liked in localStorage");
                 alert('Already liked!'); 
                 return; 
             }
@@ -188,15 +195,32 @@
             this.classList.add('liked');
             this.querySelector('i').className = 'fas fa-heart';
             
+            // Update display immediately
             const count = document.getElementById('like-count');
             const newCount = parseInt(count.textContent) + 1;
             count.textContent = newCount;
+            console.log("🔍 New like count:", newCount);
             
             try {
-                await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
-                console.log("✅ Like saved");
+                const docRef = doc(db, 'posts', id);
+                await updateDoc(docRef, { likes: increment(1) });
+                console.log("✅ Firestore updated successfully!");
+                
+                // Verify the update
+                const updatedDoc = await getDoc(docRef);
+                console.log("🔍 Updated likes in Firestore:", updatedDoc.data().likes);
+                
             } catch (err) {
-                console.error("❌ Error:", err);
+                console.error("❌ Error updating Firestore:", err);
+                alert('Failed to save like: ' + err.message);
+                // Revert
+                const revertLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+                const index = revertLiked.indexOf(id);
+                if (index > -1) revertLiked.splice(index, 1);
+                localStorage.setItem('liked_posts', JSON.stringify(revertLiked));
+                this.classList.remove('liked');
+                this.querySelector('i').className = 'far fa-heart';
+                count.textContent = parseInt(count.textContent) - 1;
             }
         });
 
@@ -208,18 +232,9 @@
             this.disabled = true;
             this.textContent = 'Posting...';
             try {
-                // 1. Add the comment to the subcollection
                 await addDoc(collection(db, 'posts', id, 'comments'), {
                     name, text, createdAt: serverTimestamp()
                 });
-                
-                // 2. Increment the commentCount in the post document
-                const postRef = doc(db, 'posts', id);
-                await updateDoc(postRef, {
-                    commentCount: increment(1)
-                });
-                
-                console.log("✅ Comment added and count incremented");
                 document.getElementById('comment-text').value = '';
                 this.textContent = 'Post Comment';
                 this.disabled = false;
@@ -232,23 +247,16 @@
     }
 
     function loadComments(postId) {
-        console.log("🔍 Loading comments for post:", postId);
         const q = query(collection(db, 'posts', postId, 'comments'), orderBy('createdAt', 'desc'));
-        
         onSnapshot(q, (snapshot) => {
             const list = document.getElementById('comments-list');
-            console.log("🔍 Comments found:", snapshot.size);
-            
             if (snapshot.empty) {
                 list.innerHTML = '<p class="no-comments">No comments yet. Be the first!</p>';
                 return;
             }
-            
             list.innerHTML = '';
             snapshot.forEach(doc => {
                 const comment = doc.data();
-                console.log("🔍 Comment:", comment);
-                
                 const div = document.createElement('div');
                 div.className = 'comment-item';
                 div.innerHTML = `
