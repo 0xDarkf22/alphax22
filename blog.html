@@ -72,9 +72,7 @@
                 <button class="filter-btn" data-filter="misc">Misc</button>
             </div>
         </div>
-        <div class="posts-feed" id="posts-feed">
-            <div class="loading-spinner"></div>
-        </div>
+        <div id="posts-feed"></div>
     </section>
 </main>
 
@@ -83,6 +81,33 @@
 </footer>
 
 <style>
+:root {
+    --bg-color: #0a0a0a;
+    --bg-alt: #111111;
+    --card-bg: #151515;
+    --text-main: #f8fafc;
+    --text-muted: #a1a1aa;
+    --accent-color: #0d9488;
+    --border-color: #27272a;
+}
+[data-theme="light"] {
+    --bg-color: #ffffff;
+    --bg-alt: #f8f9fa;
+    --card-bg: #ffffff;
+    --text-main: #1f2937;
+    --text-muted: #4b5563;
+    --border-color: #e5e7eb;
+}
+body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text-main);
+    background-color: var(--bg-color);
+    line-height: 1.6;
+    transition: background-color 0.3s, color 0.3s;
+    margin: 0;
+    padding: 0;
+}
+.section-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
 .loading-spinner {
     width: 40px;
     height: 40px;
@@ -114,149 +139,62 @@
 .post-actions button:hover { background: rgba(13,148,136,0.08); }
 .post-actions button.liked { color: #ef4444; }
 .post-actions button.liked i { color: #ef4444; }
+.btn-subscribe { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; background: transparent; border: 2px solid var(--accent-color); color: var(--accent-color); border-radius: 6px; font-family: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: 0.3s; }
+.btn-subscribe:hover { background: var(--accent-color); color: #fff; }
+.blog-filters { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; }
+.filter-btn { padding: 0.4rem 1rem; background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 20px; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.3s; }
+.filter-btn:hover, .filter-btn.active { border-color: var(--accent-color); color: var(--accent-color); background: rgba(13,148,136,0.08); }
+.code-tag { color: #f59e0b; font-family: monospace; font-size: 1.1rem; }
+.blog-main-title { font-size: 2.5rem; margin: 0.3rem 0 0.5rem; color: var(--text-main); }
+.blog-subtitle { color: var(--text-muted); font-size: 1.05rem; }
+.logo a { font-size: 1.5rem; font-weight: 700; color: var(--text-main); text-decoration: none; }
+.nav-container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; height: 100%; display: flex; justify-content: space-between; align-items: center; }
+.nav-links { display: flex; gap: 2rem; list-style: none; }
+.nav-link { font-weight: 600; color: var(--text-muted); text-decoration: none; transition: color 0.3s; }
+.nav-link:hover, .nav-link.active { color: var(--accent-color); }
+.nav-actions { display: flex; align-items: center; gap: 1.5rem; }
+#theme-toggle { background: none; border: none; color: var(--text-main); font-size: 1.2rem; cursor: pointer; }
+.hamburger { display: none; font-size: 1.5rem; cursor: pointer; color: var(--text-main); }
+footer { background-color: #000; padding: 2rem; text-align: center; color: var(--text-muted); }
+@media (max-width: 768px) {
+    .nav-links { display: none; }
+    .hamburger { display: block; }
+    .blog-main-title { font-size: 1.8rem; }
+    .post-card { padding: 1rem; }
+    .post-title { font-size: 1.1rem; }
+}
 </style>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-    getFirestore,
-    collection,
-    query,
-    orderBy,
-    getDocs,
-    doc,
-    updateDoc,
-    increment
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ── YOUR FIREBASE CONFIG ─────────────────────────────────────
+// ── FIREBASE CONFIG ───────────────────────────────────────────
 const firebaseConfig = {
     apiKey: "AIzaSyAeYGzHvgOC8mQGI-5dc16I9bBRez_LAcc",
     authDomain: "alphax22.firebaseapp.com",
     projectId: "alphax22",
     storageBucket: "alphax22.firebasestorage.app",
     messagingSenderId: "564241919435",
-    appId: "1:564241919435:web:a0146fd9a65f32a1125a4e",
-    measurementId: "G-F6GW3R1WMP"
+    appId: "1:564241919435:web:a0146fd9a65f32a1125a4e"
 };
 // ─────────────────────────────────────────────────────────────
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const feed = document.getElementById('posts-feed');
-
-// ── TIME AGO ──────────────────────────────────────────────────
-function timeAgo(ts) {
-    if (!ts) return '';
-    const d = ts.toDate ? ts.toDate() : new Date(ts);
-    const diff = (Date.now() - d) / 1000;
-    if (diff < 60) return 'just now';
-    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
-    if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
-    if (diff < 604800) return Math.floor(diff/86400) + 'd ago';
-    return d.toLocaleDateString();
-}
-
-// ── BUILD POST CARD ──────────────────────────────────────────
-function buildPostCard(post, id) {
-    const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-    const isLiked = likedPosts.includes(id);
-
-    const card = document.createElement('article');
-    card.className = 'post-card';
-
-    const hasImage = post.imageUrl && post.imageUrl.trim() !== '';
-
-    card.innerHTML = `
-        <div class="post-header">
-            <div class="post-avatar">A</div>
-            <div>
-                <div class="post-author">AlphaX</div>
-                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-                    <span class="post-time">${timeAgo(post.createdAt)}</span>
-                    <span class="post-category-tag">${(post.category || 'misc').toUpperCase()}</span>
-                </div>
-            </div>
-        </div>
-        <div class="post-title" data-id="${id}">${post.title}</div>
-        <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 150) + '...' || ''}</div>
-        ${hasImage ? `<div class="post-image" data-id="${id}"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
-        <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
-        <div class="post-actions">
-            <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
-                <i class="fa${isLiked ? 's' : 'r'} fa-heart"></i>
-                <span class="like-count">${post.likes || 0}</span>
-            </button>
-            <button class="comment-btn" data-id="${id}">
-                <i class="far fa-comment"></i>
-                <span>${post.commentCount || 0}</span>
-            </button>
-            <button class="share-btn" data-id="${id}">
-                <i class="fas fa-share-alt"></i>
-            </button>
-        </div>
-    `;
-
-    // ── Like ──
-    card.querySelector('.like-btn').addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const btn = e.currentTarget;
-        const liked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-        if (liked.includes(id)) { return; }
-        liked.push(id);
-        localStorage.setItem('liked_posts', JSON.stringify(liked));
-        btn.classList.add('liked');
-        btn.querySelector('i').className = 'fas fa-heart';
-        const count = btn.querySelector('.like-count');
-        count.textContent = parseInt(count.textContent) + 1;
-        try {
-            await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
-        } catch {}
-    });
-
-    // ── Comment ──
-    card.querySelector('.comment-btn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        window.location.href = `blog-post.html?id=${id}`;
-    });
-
-    // ── Share ──
-    card.querySelector('.share-btn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        const url = `https://alphax22.web.app/blog-post.html?id=${id}`;
-        if (navigator.share) {
-            navigator.share({ title: post.title, url });
-        } else {
-            navigator.clipboard.writeText(url).then(() => alert('Link copied!'));
-        }
-    });
-
-    // ── Click on title or image → go to post ──
-    card.querySelector('.post-title').addEventListener('click', () => {
-        window.location.href = `blog-post.html?id=${id}`;
-    });
-    const imgWrap = card.querySelector('.post-image');
-    if (imgWrap) {
-        imgWrap.addEventListener('click', () => {
-            window.location.href = `blog-post.html?id=${id}`;
-        });
-    }
-
-    return card;
-}
-
-// ── LOAD POSTS ────────────────────────────────────────────────
+// ── LOAD POSTS ─────────────────────────────────────────────────
 async function loadPosts() {
+    const feed = document.getElementById('posts-feed');
+
     try {
-        console.log("Loading posts from Firestore...");
-        const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-        const snap = await getDocs(q);
-        console.log("Posts found:", snap.size);
+        feed.innerHTML = '<div class="loading-spinner"></div>';
+        const postsRef = collection(db, 'posts');
+        const snapshot = await getDocs(postsRef);
 
         feed.innerHTML = '';
 
-        if (snap.empty) {
+        if (snapshot.empty) {
             feed.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-terminal"></i>
@@ -266,59 +204,47 @@ async function loadPosts() {
             return;
         }
 
-        snap.forEach(doc => {
+        snapshot.forEach(doc => {
             const post = doc.data();
-            console.log("Post title:", post.title);
-            feed.appendChild(buildPostCard(post, doc.id));
+            const card = document.createElement('div');
+            card.className = 'post-card';
+            card.innerHTML = `
+                <div class="post-header">
+                    <div class="post-avatar">A</div>
+                    <div>
+                        <div class="post-author">AlphaX</div>
+                        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+                            <span class="post-time">Just now</span>
+                            <span class="post-category-tag">${(post.category || 'misc').toUpperCase()}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-title">${post.title}</div>
+                <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 150) + '...' || ''}</div>
+                ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
+                <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
+                <div class="post-actions">
+                    <button><i class="far fa-heart"></i> ${post.likes || 0}</button>
+                    <button><i class="far fa-comment"></i> ${post.commentCount || 0}</button>
+                    <button><i class="fas fa-share-alt"></i></button>
+                </div>
+            `;
+            feed.appendChild(card);
         });
+
     } catch (err) {
-        console.error("Error loading posts:", err.message);
         feed.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-exclamation-triangle"></i>
-                <p>Failed to load posts: ${err.message}</p>
+                <p>Error loading posts: ${err.message}</p>
             </div>
         `;
     }
 }
 
-// ── SUBSCRIBE ──────────────────────────────────────────────────
-document.getElementById('subscribe-btn').addEventListener('click', function() {
-    if (Notification.permission === 'granted') {
-        alert('✅ Notifications already enabled!');
-    } else if (Notification.permission === 'denied') {
-        alert('❌ Notifications are blocked. Please enable in your browser settings.');
-    } else {
-        Notification.requestPermission().then(function(permission) {
-            if (permission === 'granted') {
-                alert('✅ Notifications enabled! You\'ll be notified of new posts.');
-            } else {
-                alert('❌ You declined notifications. You can enable them later in browser settings.');
-            }
-        });
-    }
-});
-
-// ── NAV / THEME ───────────────────────────────────────────────
-const hamburger = document.getElementById('hamburger');
-const navLinks = document.getElementById('nav-links');
-hamburger.addEventListener('click', () => navLinks.classList.toggle('active'));
-
-const themeToggle = document.getElementById('theme-toggle');
-const html = document.documentElement;
-const saved = localStorage.getItem('theme') || 'dark';
-html.setAttribute('data-theme', saved);
-themeToggle.innerHTML = saved === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-themeToggle.addEventListener('click', () => {
-    const cur = html.getAttribute('data-theme');
-    const next = cur === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
-    themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-});
-
 // ── INIT ──────────────────────────────────────────────────────
 loadPosts();
 </script>
+
 </body>
 </html>
