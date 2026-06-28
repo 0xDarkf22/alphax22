@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlphaX | Post</title>
+    <meta name="description" content="Post by AlphaX — Cybersecurity Researcher & Bug Bounty Hunter.">
+    <link rel="canonical" href="https://alphax22.web.app/blog-post.html">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="blog.css">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+</head>
+<body>
+
+<!-- HEADER / NAV -->
+<header>
+    <nav class="nav-container">
+        <div class="logo"><a href="index.html">0xAlpha22</a></div>
+        <ul class="nav-links" id="nav-links">
+            <li><a href="index.html#home" class="nav-link">Home</a></li>
+            <li><a href="index.html#about" class="nav-link">About</a></li>
+            <li><a href="projects.html" class="nav-link">Projects</a></li>
+            <li><a href="https://alphalabs-22.web.app/index.html" class="nav-link">Writeups</a></li>
+            <li><a href="certificates.html" class="nav-link">Certificates</a></li>
+            <li><a href="blog.html" class="nav-link">Blog</a></li>
+            <li><a href="resume.html" class="nav-link">Resume</a></li>
+            <li><a href="index.html#contact" class="nav-link">Contact</a></li>
+        </ul>
+        <div class="nav-actions">
+            <button id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-moon"></i></button>
+            <div class="hamburger" id="hamburger"><i class="fas fa-bars"></i></div>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <!-- Post Not Found -->
+    <div class="post-not-found" id="post-not-found" style="display:none;">
+        <i class="fas fa-terminal"></i>
+        <h2>Post not found</h2>
+        <a href="blog.html" class="btn btn-primary">← Back to Blog</a>
+    </div>
+
+    <!-- Post Article -->
+    <article class="post-article" id="post-article" style="display:none;">
+        <div class="post-article-inner section-container">
+
+            <!-- Back Link -->
+            <a href="blog.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Blog</a>
+
+            <!-- Hero Image -->
+            <div class="post-hero-img" id="post-hero-img" style="display:none;">
+                <img id="post-img" src="" alt="">
+            </div>
+
+            <!-- Post Header -->
+            <header class="post-header">
+                <div class="post-header-meta">
+                    <span class="post-category" id="post-category"></span>
+                    <span class="post-date-full"><i class="fas fa-calendar-alt"></i> <span id="post-date"></span></span>
+                </div>
+                <h1 id="post-title" class="post-full-title"></h1>
+                <div class="post-tags-full" id="post-tags-full"></div>
+                <div class="post-author-row">
+                    <div class="post-author">
+                        <div class="author-avatar"><i class="fas fa-user-secret"></i></div>
+                        <div>
+                            <span class="author-name">AlphaX</span>
+                            <span class="author-role">Cybersecurity Researcher</span>
+                        </div>
+                    </div>
+                    <div class="post-share-row">
+                        <button class="action-btn share-btn" id="share-post-btn"><i class="fas fa-share-alt"></i> Share</button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Post Body -->
+            <div class="post-body" id="post-body"></div>
+
+            <!-- Post Footer Actions -->
+            <div class="post-footer-actions">
+                <button class="action-btn like-btn-full" id="like-post-btn">
+                    <i class="far fa-heart"></i>
+                    <span id="like-count-full">0</span> Likes
+                </button>
+            </div>
+
+        </div>
+    </article>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+    <p>© 2026 AlphaX. All rights reserved.</p>
+</footer>
+
+<script>
+// =============================================
+// BLOG POST LOGIC - Reads from db.js
+// =============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadPost();
+});
+
+function loadPost() {
+    const params = new URLSearchParams(window.location.search);
+    const postId = params.get('id');
+
+    if (!postId) {
+        showNotFound();
+        return;
+    }
+
+    const postsData = typeof posts !== 'undefined' ? posts : [];
+    const post = postsData.find(p => p.id === postId);
+
+    if (!post) {
+        showNotFound();
+        return;
+    }
+
+    renderPost(post);
+}
+
+function renderPost(post) {
+    document.getElementById('post-article').style.display = 'block';
+
+    // Hero image
+    if (post.imageUrl && post.imageUrl.trim() !== '') {
+        document.getElementById('post-hero-img').style.display = 'block';
+        document.getElementById('post-img').src = post.imageUrl;
+        document.getElementById('post-img').alt = post.title;
+    }
+
+    // Category
+    const catEl = document.getElementById('post-category');
+    catEl.textContent = (post.category || 'misc').toUpperCase();
+    catEl.className = `post-category cat-${post.category || 'misc'}`;
+
+    // Date
+    document.getElementById('post-date').textContent = post.date || 'Unknown date';
+
+    // Title
+    document.getElementById('post-title').textContent = post.title;
+
+    // Tags
+    const tagsEl = document.getElementById('post-tags-full');
+    if (post.tags && post.tags.length) {
+        tagsEl.innerHTML = post.tags.map(t => `<span class="post-tag">${t}</span>`).join('');
+    }
+
+    // Body - support markdown-like formatting
+    document.getElementById('post-body').innerHTML = renderContent(post.content);
+
+    // Likes (stored locally)
+    const likeCount = document.getElementById('like-count-full');
+    likeCount.textContent = post.likes || 0;
+
+    // Like button
+    const likeBtn = document.getElementById('like-post-btn');
+    const liked = (JSON.parse(localStorage.getItem('liked_posts') || '[]')).includes(post.id);
+    if (liked) {
+        likeBtn.classList.add('liked');
+        likeBtn.querySelector('i').className = 'fas fa-heart';
+    }
+    likeBtn.addEventListener('click', function() {
+        const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+        if (likedPosts.includes(post.id)) {
+            alert('You already liked this post!');
+            return;
+        }
+        likedPosts.push(post.id);
+        localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
+        likeBtn.classList.add('liked');
+        likeBtn.querySelector('i').className = 'fas fa-heart';
+        likeCount.textContent = parseInt(likeCount.textContent) + 1;
+    });
+
+    // Share
+    document.getElementById('share-post-btn').addEventListener('click', function() {
+        const url = window.location.href;
+        if (navigator.share) {
+            navigator.share({ title: post.title, url });
+        } else {
+            navigator.clipboard.writeText(url).then(() => alert('✅ Link copied!'));
+        }
+    });
+
+    // Update page title
+    document.title = `AlphaX | ${post.title}`;
+}
+
+function renderContent(text) {
+    if (!text) return '';
+    let html = text
+        .replace(/```([\s\S]*?)```/g, (_, c) => `<pre class="code-block"><code>${escapeHtml(c.trim())}</code></pre>`)
+        .replace(/`([^`]+)`/g, (_, c) => `<code class="inline-code">${escapeHtml(c)}</code>`)
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+        .replace(/^- (.+)$/gm, '<li>$1</li>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+
+    html = html.replace(/(<li>.*?<\/li>)+/gs, '<ul>$&</ul>');
+    return `<p>${html}</p>`;
+}
+
+function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function showNotFound() {
+    document.getElementById('post-not-found').style.display = 'flex';
+}
+
+// ── NAV / THEME ───────────────────────────────────────────────
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('nav-links');
+hamburger.addEventListener('click', () => navLinks.classList.toggle('active'));
+
+const themeToggle = document.getElementById('theme-toggle');
+const html = document.documentElement;
+const saved = localStorage.getItem('theme') || 'dark';
+html.setAttribute('data-theme', saved);
+themeToggle.innerHTML = saved === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+themeToggle.addEventListener('click', () => {
+    const cur = html.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+});
+</script>
+
+<!-- Load db.js last -->
+<script src="db.js"></script>
+</body>
+  </html>
