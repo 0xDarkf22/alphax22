@@ -15,7 +15,7 @@
         .post-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; transition: 0.3s; }
         .post-card:hover { border-color: var(--accent-color); }
         .post-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
-        .post-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-color); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; }
+        .post-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-color); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; flex-shrink: 0; }
         .post-title { font-size: 1.3rem; font-weight: 700; cursor: pointer; }
         .post-title:hover { color: var(--accent-color); }
         .post-excerpt { color: var(--text-muted); line-height: 1.6; }
@@ -105,11 +105,14 @@
 
     // ── BUILD POST CARD ──
     function buildPostCard(post, id) {
-        const isLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]').includes(id);
+        const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+        const isLiked = likedPosts.includes(id);
+        const likeCount = post.likes || 0;
         
         const card = document.createElement('div');
         card.className = 'post-card';
         card.dataset.category = post.category || 'misc';
+        card.dataset.postId = id;
 
         card.innerHTML = `
             <div class="post-header">
@@ -126,7 +129,7 @@
             <div class="post-actions">
                 <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
                     <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
-                    <span class="like-count">${post.likes || 0}</span>
+                    <span class="like-count">${likeCount}</span>
                 </button>
                 <button onclick="window.location.href='blog-post.html?id=${id}'">
                     <i class="far fa-comment"></i> ${post.commentCount || 0}
@@ -147,46 +150,57 @@
             const isCurrentlyLiked = likedPosts.includes(id);
             const countSpan = this.querySelector('.like-count');
             const icon = this.querySelector('i');
+            let currentCount = parseInt(countSpan.textContent);
 
             if (isCurrentlyLiked) {
                 // ── DISLIKE ──
+                // Check if count > 0 before disliking
+                if (currentCount <= 0) {
+                    console.log("⚠️ Cannot dislike - count is already 0");
+                    return;
+                }
+                
+                // Remove from localStorage
                 const newLiked = likedPosts.filter(p => p !== id);
                 localStorage.setItem('liked_posts', JSON.stringify(newLiked));
                 
+                // Update UI
                 this.classList.remove('liked');
                 icon.className = 'far fa-heart';
-                countSpan.textContent = parseInt(countSpan.textContent) - 1;
+                countSpan.textContent = currentCount - 1;
                 
                 try {
                     await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
-                    console.log("✅ Disliked");
+                    console.log("✅ Disliked - count:", currentCount - 1);
                 } catch (err) {
                     console.error("❌ Error:", err);
-                    // Revert
+                    // Revert UI
                     this.classList.add('liked');
                     icon.className = 'fas fa-heart';
-                    countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                    countSpan.textContent = currentCount;
                     likedPosts.push(id);
                     localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
                 }
             } else {
                 // ── LIKE ──
+                // Add to localStorage
                 likedPosts.push(id);
                 localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
                 
+                // Update UI
                 this.classList.add('liked');
                 icon.className = 'fas fa-heart';
-                countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                countSpan.textContent = currentCount + 1;
                 
                 try {
                     await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
-                    console.log("✅ Liked");
+                    console.log("✅ Liked - count:", currentCount + 1);
                 } catch (err) {
                     console.error("❌ Error:", err);
-                    // Revert
+                    // Revert UI
                     this.classList.remove('liked');
                     icon.className = 'far fa-heart';
-                    countSpan.textContent = parseInt(countSpan.textContent) - 1;
+                    countSpan.textContent = currentCount;
                     const revertLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
                     const index = revertLiked.indexOf(id);
                     if (index > -1) revertLiked.splice(index, 1);
