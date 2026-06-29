@@ -27,6 +27,7 @@
         .post-actions button { background: none; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.8rem; border-radius: 8px; font-family: inherit; transition: 0.2s; }
         .post-actions button:hover { background: rgba(13,148,136,0.08); }
         .post-actions button.liked { color: #ef4444; }
+        .post-actions button.liked i { color: #ef4444; }
         .filter-btn { padding: 0.4rem 1rem; background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 20px; font-family: inherit; cursor: pointer; transition: 0.3s; }
         .filter-btn:hover, .filter-btn.active { border-color: var(--accent-color); color: var(--accent-color); background: rgba(13,148,136,0.08); }
         .loading-spinner { width: 40px; height: 40px; border: 3px solid var(--border-color); border-top-color: var(--accent-color); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 2rem auto; }
@@ -39,6 +40,8 @@
         .hamburger { display: none; font-size: 1.5rem; cursor: pointer; }
         @media (max-width: 768px) { .nav-links { display: none; } .hamburger { display: block; } }
         footer { background: #000; padding: 2rem; text-align: center; color: var(--text-muted); }
+        .empty-state { text-align: center; padding: 3rem 2rem; color: var(--text-muted); }
+        .empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
     </style>
 </head>
 <body>
@@ -81,7 +84,10 @@
 
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { 
+        getFirestore, collection, doc, updateDoc, increment, 
+        query, orderBy, onSnapshot 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAeYGzHvgOC8mQGI-5dc16I9bBRez_LAcc",
@@ -97,72 +103,133 @@
     const feed = document.getElementById('posts-feed');
     let currentFilter = 'all';
 
-    async function loadPosts() {
-        try {
-            const snapshot = await getDocs(collection(db, 'posts'));
+    // ── BUILD POST CARD ──
+    function buildPostCard(post, id) {
+        const isLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]').includes(id);
+        
+        const card = document.createElement('div');
+        card.className = 'post-card';
+        card.dataset.category = post.category || 'misc';
+
+        card.innerHTML = `
+            <div class="post-header">
+                <div class="post-avatar">A</div>
+                <div>
+                    <div style="font-weight:700;">AlphaX</div>
+                    <div style="color:var(--text-muted);font-size:0.8rem;">${post.category || 'Misc'}</div>
+                </div>
+            </div>
+            <div class="post-title" onclick="window.location.href='blog-post.html?id=${id}'">${post.title}</div>
+            <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 150) + '...' || ''}</div>
+            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
+            <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
+            <div class="post-actions">
+                <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
+                    <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
+                    <span class="like-count">${post.likes || 0}</span>
+                </button>
+                <button onclick="window.location.href='blog-post.html?id=${id}'">
+                    <i class="far fa-comment"></i> ${post.commentCount || 0}
+                </button>
+                <button onclick="navigator.clipboard.writeText('https://alphax22.web.app/blog-post.html?id=${id}')">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+            </div>
+        `;
+
+        // ── LIKE / DISLIKE ──
+        const likeBtn = card.querySelector('.like-btn');
+        
+        likeBtn.addEventListener('click', async function(e) {
+            e.stopPropagation();
+            const id = this.dataset.id;
+            const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+            const isCurrentlyLiked = likedPosts.includes(id);
+            const countSpan = this.querySelector('.like-count');
+            const icon = this.querySelector('i');
+
+            if (isCurrentlyLiked) {
+                // ── DISLIKE ──
+                const newLiked = likedPosts.filter(p => p !== id);
+                localStorage.setItem('liked_posts', JSON.stringify(newLiked));
+                
+                this.classList.remove('liked');
+                icon.className = 'far fa-heart';
+                countSpan.textContent = parseInt(countSpan.textContent) - 1;
+                
+                try {
+                    await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
+                    console.log("✅ Disliked");
+                } catch (err) {
+                    console.error("❌ Error:", err);
+                    // Revert
+                    this.classList.add('liked');
+                    icon.className = 'fas fa-heart';
+                    countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                    likedPosts.push(id);
+                    localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
+                }
+            } else {
+                // ── LIKE ──
+                likedPosts.push(id);
+                localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
+                
+                this.classList.add('liked');
+                icon.className = 'fas fa-heart';
+                countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                
+                try {
+                    await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
+                    console.log("✅ Liked");
+                } catch (err) {
+                    console.error("❌ Error:", err);
+                    // Revert
+                    this.classList.remove('liked');
+                    icon.className = 'far fa-heart';
+                    countSpan.textContent = parseInt(countSpan.textContent) - 1;
+                    const revertLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+                    const index = revertLiked.indexOf(id);
+                    if (index > -1) revertLiked.splice(index, 1);
+                    localStorage.setItem('liked_posts', JSON.stringify(revertLiked));
+                }
+            }
+        });
+
+        return card;
+    }
+
+    // ── LOAD POSTS WITH REAL-TIME SYNC ──
+    function loadPosts() {
+        const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+        
+        onSnapshot(q, (snapshot) => {
             feed.innerHTML = '';
+            
             if (snapshot.empty) {
-                feed.innerHTML = '<p style="text-align:center;color:var(--text-muted);">No posts yet.</p>';
+                feed.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-terminal"></i>
+                        <p>No posts yet. Check back soon.</p>
+                    </div>
+                `;
                 return;
             }
+
             snapshot.forEach(doc => {
                 const post = doc.data();
                 const id = doc.id;
-                const card = document.createElement('div');
-                card.className = 'post-card';
-                card.dataset.category = post.category || 'misc';
-                const isLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]').includes(id);
-                card.innerHTML = `
-                    <div class="post-header">
-                        <div class="post-avatar">A</div>
-                        <div>
-                            <div style="font-weight:700;">AlphaX</div>
-                            <div style="color:var(--text-muted);font-size:0.8rem;">${post.category || 'Misc'}</div>
-                        </div>
-                    </div>
-                    <div class="post-title" onclick="window.location.href='blog-post.html?id=${id}'">${post.title}</div>
-                    <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 150) + '...' || ''}</div>
-                    ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
-                    <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
-                    <div class="post-actions">
-                        <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
-                            <i class="fa${isLiked ? 's' : 'r'} fa-heart"></i>
-                            <span class="like-count">${post.likes || 0}</span>
-                        </button>
-                        <button onclick="window.location.href='blog-post.html?id=${id}'">
-                            <i class="far fa-comment"></i> ${post.commentCount || 0}
-                        </button>
-                        <button onclick="navigator.clipboard.writeText('https://alphax22.web.app/blog-post.html?id=${id}')">
-                            <i class="fas fa-share-alt"></i>
-                        </button>
-                    </div>
-                `;
+                const card = buildPostCard(post, id);
                 feed.appendChild(card);
-
-                // Like functionality
-                card.querySelector('.like-btn').addEventListener('click', async function(e) {
-                    e.stopPropagation();
-                    const id = this.dataset.id;
-                    const liked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-                    if (liked.includes(id)) return;
-                    liked.push(id);
-                    localStorage.setItem('liked_posts', JSON.stringify(liked));
-                    this.classList.add('liked');
-                    this.querySelector('i').className = 'fas fa-heart';
-                    const count = this.querySelector('.like-count');
-                    count.textContent = parseInt(count.textContent) + 1;
-                    await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
-                });
             });
+
             applyFilter();
-        } catch (err) {
-            feed.innerHTML = `<p style="color:#ef4444;">Error: ${err.message}</p>`;
-        }
+        });
     }
 
+    // ── FILTER ──
     function applyFilter() {
         document.querySelectorAll('.post-card').forEach(card => {
-            const category = card.dataset.category;
+            const category = card.dataset.category || 'misc';
             card.style.display = (currentFilter === 'all' || category === currentFilter) ? 'block' : 'none';
         });
     }
@@ -176,7 +243,7 @@
         });
     });
 
-    // Theme toggle
+    // ── THEME TOGGLE ──
     const themeToggle = document.getElementById('theme-toggle');
     const html = document.documentElement;
     const saved = localStorage.getItem('theme') || 'dark';
@@ -190,10 +257,12 @@
         themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
     });
 
+    // ── MOBILE NAV ──
     document.getElementById('hamburger').addEventListener('click', () => {
         document.getElementById('nav-links').classList.toggle('active');
     });
 
+    // ── INIT ──
     loadPosts();
     </script>
 </body>
