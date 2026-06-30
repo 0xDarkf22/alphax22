@@ -629,6 +629,42 @@
             applyFiltersAndSort();
         });
     }
+        // ── FORCE SYNC: Check Firestore vs localStorage ──
+async function syncLikes() {
+    const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    snap.forEach(doc => {
+        const post = doc.data();
+        const id = doc.id;
+        const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+        
+        // If Firestore says 0 but localStorage says liked → fix it
+        if (post.likes === 0 && likedPosts.includes(id)) {
+            const newLiked = likedPosts.filter(p => p !== id);
+            localStorage.setItem('liked_posts', JSON.stringify(newLiked));
+        }
+        
+        // Update UI
+        document.querySelectorAll(`.like-btn[data-id="${id}"]`).forEach(btn => {
+            const countSpan = btn.querySelector('.like-count');
+            if (countSpan) countSpan.textContent = post.likes || 0;
+            
+            const isLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]').includes(id);
+            if (isLiked) {
+                btn.classList.add('liked');
+                btn.querySelector('i').className = 'fas fa-heart';
+            } else {
+                btn.classList.remove('liked');
+                btn.querySelector('i').className = 'far fa-heart';
+            }
+        });
+    });
+}
+
+// ── Call sync on page load ──
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(syncLikes, 500);
+});
 
     // ── APPLY FILTERS & SORT ──
     function applyFiltersAndSort() {
