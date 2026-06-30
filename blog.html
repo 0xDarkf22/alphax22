@@ -651,10 +651,13 @@
     }
 
     // ── LOAD POSTS WITH REAL-TIME SYNC ──
+    let postsUnsub = null;
+
     function loadPosts() {
         const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
         
-        onSnapshot(q, (snapshot) => {
+        if (postsUnsub) postsUnsub();
+        postsUnsub = onSnapshot(q, (snapshot) => {
             allPosts = [];
             pinnedPost = null;
 
@@ -830,10 +833,16 @@
         document.getElementById('nav-links').classList.toggle('active');
     });
 
+    // ── REFRESH DATA WHEN PAGE BECOMES VISIBLE ──
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            // Page became visible again — reload data
+            loadPosts();
+        }
+    });
+
     // ── INIT ──
     loadPosts();
     </script>
 </body>
 </html>
-
-            
