@@ -8,28 +8,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        :root {
-            --bg-color: #0a0a0a;
-            --bg-alt: #111;
-            --card-bg: #151515;
-            --text-main: #f8fafc;
-            --text-muted: #a1a1aa;
-            --accent-color: #0d9488;
-            --border-color: #27272a;
-        }
-        [data-theme="light"] {
-            --bg-color: #fff;
-            --bg-alt: #f8f9fa;
-            --card-bg: #fff;
-            --text-main: #1f2937;
-            --text-muted: #4b5563;
-            --border-color: #e5e7eb;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; color: var(--text-main); background: var(--bg-color); transition: 0.3s; }
-        a { text-decoration: none; color: inherit; }
-        ul { list-style: none; }
+        :root { --bg-color: #0a0a0a; --bg-alt: #111; --card-bg: #151515; --text-main: #f8fafc; --text-muted: #a1a1aa; --accent-color: #0d9488; --border-color: #27272a; }
+        [data-theme="light"] { --bg-color: #fff; --bg-alt: #f8f9fa; --card-bg: #fff; --text-main: #1f2937; --text-muted: #4b5563; --border-color: #e5e7eb; }
+        body { font-family: 'Inter', sans-serif; color: var(--text-main); background: var(--bg-color); margin: 0; padding: 0; transition: 0.3s; }
 
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
+
+        /* ── HEADER ── */
         .nav-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -40,15 +25,15 @@
             height: 80px;
         }
         .logo a { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
-        .nav-links { display: flex; gap: 2rem; }
-        .nav-link { font-weight: 600; color: var(--text-muted); transition: 0.3s; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-link { font-weight: 600; color: var(--text-muted); text-decoration: none; transition: 0.3s; }
         .nav-link:hover, .nav-link.active { color: var(--accent-color); }
         .nav-actions { display: flex; align-items: center; gap: 1.5rem; }
         #theme-toggle { background: none; border: none; color: var(--text-main); font-size: 1.2rem; cursor: pointer; }
         .hamburger { display: none; font-size: 1.5rem; cursor: pointer; color: var(--text-main); }
+        @media (max-width: 768px) { .nav-links { display: none; } .hamburger { display: block; } }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-
+        /* ── BLOG ── */
         .blog-header {
             display: flex;
             justify-content: space-between;
@@ -60,6 +45,7 @@
         .blog-header h1 { font-size: 2.2rem; }
         .blog-header p { color: var(--text-muted); }
 
+        /* ── CONTROLS ── */
         .controls {
             display: flex;
             flex-wrap: wrap;
@@ -67,55 +53,44 @@
             margin-bottom: 2rem;
             align-items: center;
         }
-        .filter-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        .filter-buttons button {
-            padding: 0.3rem 1rem;
-            background: var(--card-bg);
+        .filter-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .filter-btn {
+            padding: 0.4rem 1rem;
+            background: transparent;
             border: 1px solid var(--border-color);
             color: var(--text-muted);
             border-radius: 20px;
             font-family: inherit;
-            font-size: 0.8rem;
             cursor: pointer;
             transition: 0.3s;
         }
-        .filter-buttons button:hover,
-        .filter-buttons button.active {
+        .filter-btn:hover, .filter-btn.active {
             border-color: var(--accent-color);
             color: var(--accent-color);
-            background: rgba(13,148,136,0.1);
+            background: rgba(13,148,136,0.08);
         }
-        .sort-options {
-            display: flex;
-            gap: 0.5rem;
-            margin-left: auto;
-        }
-        .sort-options button {
+        .sort-options { display: flex; gap: 0.5rem; margin-left: auto; }
+        .sort-btn {
             padding: 0.3rem 1rem;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             color: var(--text-muted);
             border-radius: 8px;
             font-family: inherit;
-            font-size: 0.8rem;
             cursor: pointer;
             transition: 0.3s;
         }
-        .sort-options button:hover,
-        .sort-options button.active {
+        .sort-btn:hover, .sort-btn.active {
             border-color: var(--accent-color);
             color: var(--accent-color);
             background: rgba(13,148,136,0.1);
         }
 
+        /* ── PINNED POST ── */
         .pinned-post {
             background: var(--card-bg);
             border: 2px solid var(--accent-color);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 1.5rem 2rem;
             margin-bottom: 2rem;
             cursor: pointer;
@@ -126,11 +101,7 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 30px rgba(13,148,136,0.15);
         }
-        .pinned-post:active {
-            transform: none !important;
-            border-color: var(--accent-color) !important;
-            box-shadow: none !important;
-        }
+        .pinned-post:active { transform: none !important; }
         .pinned-post .pinned-badge {
             position: absolute;
             top: -10px;
@@ -143,31 +114,35 @@
             border-radius: 12px;
             letter-spacing: 0.5px;
         }
-        .pinned-post .category-badge {
-            font-size: 0.7rem;
-            padding: 0.15rem 0.6rem;
-            border-radius: 12px;
-            background: rgba(13,148,136,0.15);
-            color: var(--accent-color);
-            border: 1px solid rgba(13,148,136,0.2);
-            display: inline-block;
-            margin-bottom: 0.5rem;
+        .pinned-post .post-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .pinned-post .post-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            flex-shrink: 0;
         }
         .pinned-post .post-title {
             font-size: 1.5rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            cursor: pointer;
         }
         .pinned-post .post-title:hover { color: var(--accent-color); }
-        .pinned-post .post-excerpt {
-            color: var(--text-muted);
-            font-size: 1rem;
-            line-height: 1.6;
-        }
+        .pinned-post .post-excerpt { color: var(--text-muted); line-height: 1.6; }
         .pinned-post .post-image {
-            border-radius: 8px;
+            border-radius: 12px;
             overflow: hidden;
-            margin: 0.5rem 0;
+            margin: 0.75rem 0;
         }
         .pinned-post .post-image img {
             width: 100%;
@@ -178,34 +153,43 @@
         .pinned-post .post-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.3rem;
+            gap: 0.4rem;
             margin: 0.5rem 0;
         }
         .pinned-post .post-tag {
-            font-size: 0.65rem;
-            padding: 0.1rem 0.5rem;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.6rem;
             border-radius: 4px;
             background: rgba(13,148,136,0.08);
             color: var(--accent-color);
             border: 1px solid rgba(13,148,136,0.15);
         }
-        .pinned-post .post-footer {
+        .pinned-post .post-actions {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding-top: 0.5rem;
+            gap: 1rem;
+            padding-top: 0.75rem;
             border-top: 1px solid var(--border-color);
-            margin-top: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--text-muted);
+            margin-top: 0.75rem;
         }
-        .pinned-post .post-footer .likes {
+        .pinned-post .post-actions button {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 0.3rem;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-family: inherit;
+            transition: 0.2s;
         }
-        .pinned-post .post-footer .likes i { color: #ef4444; }
+        .pinned-post .post-actions button:hover { background: rgba(13,148,136,0.08); }
+        .pinned-post .post-actions button.liked { color: #ef4444; }
+        .pinned-post .post-actions button.liked i { color: #ef4444; }
 
+        /* ── POSTS GRID ── */
         .posts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -213,47 +197,50 @@
             margin-bottom: 2rem;
         }
 
+        /* ── POST CARD ── */
         .post-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 1.5rem;
             transition: 0.3s;
             cursor: pointer;
             display: flex;
             flex-direction: column;
-            position: relative;
         }
         .post-card:hover {
             border-color: var(--accent-color);
             transform: translateY(-4px);
             box-shadow: 0 8px 30px rgba(0,0,0,0.3);
         }
-        .post-card:active {
-            transform: none !important;
-            border-color: var(--border-color) !important;
-            box-shadow: none !important;
+        .post-card:active { transform: none !important; }
+        .post-card .post-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
         }
-        .post-card .category-badge {
-            font-size: 0.7rem;
-            padding: 0.15rem 0.6rem;
-            border-radius: 12px;
-            background: rgba(13,148,136,0.15);
-            color: var(--accent-color);
-            border: 1px solid rgba(13,148,136,0.2);
-            align-self: flex-start;
-            margin-bottom: 0.5rem;
+        .post-card .post-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            flex-shrink: 0;
         }
         .post-card .post-title {
             font-size: 1.1rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            cursor: pointer;
             line-height: 1.4;
         }
         .post-card .post-title:hover { color: var(--accent-color); }
         .post-card .post-excerpt {
             color: var(--text-muted);
-            font-size: 0.9rem;
             line-height: 1.6;
             flex: 1;
             display: -webkit-box;
@@ -262,9 +249,9 @@
             overflow: hidden;
         }
         .post-card .post-image {
-            border-radius: 8px;
+            border-radius: 12px;
             overflow: hidden;
-            margin: 0.5rem 0;
+            margin: 0.75rem 0;
         }
         .post-card .post-image img {
             width: 100%;
@@ -275,67 +262,43 @@
         .post-card .post-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.3rem;
+            gap: 0.4rem;
             margin: 0.5rem 0;
         }
         .post-card .post-tag {
-            font-size: 0.65rem;
-            padding: 0.1rem 0.5rem;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.6rem;
             border-radius: 4px;
             background: rgba(13,148,136,0.08);
             color: var(--accent-color);
             border: 1px solid rgba(13,148,136,0.15);
         }
-        .post-card .post-footer {
+        .post-card .post-actions {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding-top: 0.5rem;
+            gap: 1rem;
+            padding-top: 0.75rem;
             border-top: 1px solid var(--border-color);
-            margin-top: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--text-muted);
+            margin-top: 0.75rem;
         }
-        .post-card .post-footer .likes {
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-        .post-card .post-footer .likes i { color: #ef4444; }
-
-        .post-card .like-btn,
-        .pinned-post .like-btn {
+        .post-card .post-actions button {
             background: none;
             border: none;
-            cursor: pointer;
             color: var(--text-muted);
-            font-size: 0.8rem;
-            display: inline-flex;
+            cursor: pointer;
+            display: flex;
             align-items: center;
-            gap: 0.2rem;
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-            transition: 0.2s;
-            opacity: 0.4;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
             font-family: inherit;
+            transition: 0.2s;
         }
-        .post-card:hover .like-btn,
-        .pinned-post:hover .like-btn {
-            opacity: 1;
-        }
-        .post-card .like-btn:hover,
-        .pinned-post .like-btn:hover {
-            background: rgba(239,68,68,0.1);
-        }
-        .post-card .like-btn.liked,
-        .pinned-post .like-btn.liked {
-            opacity: 1;
-        }
-        .post-card .like-btn.liked i,
-        .pinned-post .like-btn.liked i {
-            color: #ef4444;
-        }
+        .post-card .post-actions button:hover { background: rgba(13,148,136,0.08); }
+        .post-card .post-actions button.liked { color: #ef4444; }
+        .post-card .post-actions button.liked i { color: #ef4444; }
 
+        /* ── PAGINATION ── */
         .pagination {
             display: flex;
             justify-content: center;
@@ -369,6 +332,7 @@
             cursor: not-allowed;
         }
 
+        /* ── LOADING & EMPTY ── */
         .loading-spinner {
             width: 40px;
             height: 40px;
@@ -379,10 +343,9 @@
             margin: 2rem auto;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
         .empty-state {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: 3rem 2rem;
             color: var(--text-muted);
         }
         .empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
@@ -396,8 +359,6 @@
         }
 
         @media (max-width: 768px) {
-            .nav-links { display: none; }
-            .hamburger { display: block; }
             .controls { flex-direction: column; align-items: stretch; }
             .sort-options { margin-left: 0; }
             .posts-grid { grid-template-columns: 1fr; }
@@ -414,7 +375,6 @@
     </style>
 </head>
 <body>
-
     <header>
         <nav class="nav-container">
             <div class="logo"><a href="index.html">0xAlpha22</a></div>
@@ -458,410 +418,436 @@
                 </div>
             </div>
 
-            <div id="posts-feed">
-                <div class="loading-spinner"></div>
-            </div>
-
+            <div id="posts-feed"><div class="loading-spinner"></div></div>
             <div class="pagination" id="pagination"></div>
         </div>
     </main>
 
-    <footer>
-        <p>© 2026 AlphaX. All rights reserved.</p>
-    </footer>
+    <footer><p>© 2026 AlphaX. All rights reserved.</p></footer>
+
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { 
-            getFirestore, collection, doc, updateDoc, increment,
-            query, orderBy, getDocs
-        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+        getFirestore, collection, doc, updateDoc, increment, 
+        query, orderBy, getDocs
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAeYGzHvgOC8mQGI-5dc16I9bBRez_LAcc",
-            authDomain: "alphax22.firebaseapp.com",
-            projectId: "alphax22",
-            storageBucket: "alphax22.firebasestorage.app",
-            messagingSenderId: "564241919435",
-            appId: "1:564241919435:web:a0146fd9a65f32a1125a4e"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyAeYGzHvgOC8mQGI-5dc16I9bBRez_LAcc",
+        authDomain: "alphax22.firebaseapp.com",
+        projectId: "alphax22",
+        storageBucket: "alphax22.firebasestorage.app",
+        messagingSenderId: "564241919435",
+        appId: "1:564241919435:web:a0146fd9a65f32a1125a4e"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-        const feed = document.getElementById('posts-feed');
-        const pagination = document.getElementById('pagination');
+    const feed = document.getElementById('posts-feed');
+    const pagination = document.getElementById('pagination');
 
-        let currentFilter = 'all';
-        let currentSort = 'recent';
-        let currentPage = 1;
-        let totalPosts = 0;
-        const POSTS_PER_PAGE = 6;
-        let allPosts = [];
-        let filteredPosts = [];
-        let pinnedPost = null;
-        const PINNED_TITLE = "Whoami - a 17-year old cybersecurity researcher";
+    let currentFilter = 'all';
+    let currentSort = 'recent';
+    let currentPage = 1;
+    let totalPosts = 0;
+    const POSTS_PER_PAGE = 6;
+    let allPosts = [];
+    let filteredPosts = [];
+    let pinnedPost = null;
+    const PINNED_TITLE = "Whoami - a 17-year old cybersecurity researcher";
 
-        // ── BUILD PINNED POST ──
-        function buildPinnedPost(post, id) {
-            const isLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]').includes(id);
-            const div = document.createElement('div');
-            div.className = 'pinned-post';
-            div.dataset.id = id;
+    // ── BUILD PINNED POST ──
+    function buildPinnedPost(post, id) {
+        const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+        const isLiked = likedPosts.includes(id);
+        const likeCount = post.likes || 0;
+        
+        const div = document.createElement('div');
+        div.className = 'pinned-post';
+        div.dataset.category = post.category || 'misc';
+        div.dataset.postId = id;
 
-            div.innerHTML = `
-                <span class="pinned-badge">📌 PINNED</span>
-                <span class="category-badge">${(post.category || 'misc').toUpperCase()}</span>
-                ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
-                <div class="post-title">${post.title}</div>
-                <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 200) + '...' || ''}</div>
-                <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
-                <div class="post-footer">
-                    <span>${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleDateString() : 'Unknown'}</span>
-                    <div class="likes">
-                        <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
-                            <i class="fa${isLiked ? 's' : 'r'} fa-heart"></i>
-                            <span class="like-count">${post.likes || 0}</span>
-                        </button>
-                        <span><i class="far fa-comment"></i> ${post.commentCount || 0}</span>
-                    </div>
+        div.innerHTML = `
+            <span class="pinned-badge">📌 PINNED</span>
+            <div class="post-header">
+                <div class="post-avatar">A</div>
+                <div>
+                    <div style="font-weight:700;">AlphaX</div>
+                    <div style="color:var(--text-muted);font-size:0.8rem;">${post.category || 'Misc'}</div>
                 </div>
-            `;
+            </div>
+            <div class="post-title" onclick="window.location.href='blog-post.html?id=${id}'">${post.title}</div>
+            <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 200) + '...' || ''}</div>
+            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
+            <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
+            <div class="post-actions">
+                <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
+                    <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
+                    <span class="like-count">${likeCount}</span>
+                </button>
+                <button onclick="window.location.href='blog-post.html?id=${id}'">
+                    <i class="far fa-comment"></i> ${post.commentCount || 0}
+                </button>
+                <button onclick="navigator.clipboard.writeText('https://alphax22.web.app/blog-post.html?id=${id}')">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+            </div>
+        `;
 
-            div.addEventListener('click', (e) => {
-                if (!e.target.closest('button')) {
-                    window.location.href = `blog-post.html?id=${id}`;
-                }
-            });
-
-            // ── FIX: Like Button with Error Handling ──
-            const likeBtn = div.querySelector('.like-btn');
-            likeBtn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                const id = likeBtn.dataset.id;
-                const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-                const isCurrentlyLiked = likedPosts.includes(id);
-                const countSpan = likeBtn.querySelector('.like-count');
-                const icon = likeBtn.querySelector('i');
-
-                try {
-                    if (isCurrentlyLiked) {
-                        const newLiked = likedPosts.filter(p => p !== id);
-                        localStorage.setItem('liked_posts', JSON.stringify(newLiked));
-                        likeBtn.classList.remove('liked');
-                        icon.className = 'far fa-heart';
-                        countSpan.textContent = Math.max(0, parseInt(countSpan.textContent) - 1);
-                        await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
-                        console.log('✅ Disliked:', id);
-                    } else {
-                        likedPosts.push(id);
-                        localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
-                        likeBtn.classList.add('liked');
-                        icon.className = 'fas fa-heart';
-                        countSpan.textContent = parseInt(countSpan.textContent) + 1;
-                        await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
-                        console.log('✅ Liked:', id);
-                    }
-                } catch (err) {
-                    console.error('❌ Error updating like:', err);
-                    if (isCurrentlyLiked) {
-                        likedPosts.push(id);
-                        localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
-                        likeBtn.classList.add('liked');
-                        icon.className = 'fas fa-heart';
-                        countSpan.textContent = parseInt(countSpan.textContent) + 1;
-                    } else {
-                        const revertLiked = likedPosts.filter(p => p !== id);
-                        localStorage.setItem('liked_posts', JSON.stringify(revertLiked));
-                        likeBtn.classList.remove('liked');
-                        icon.className = 'far fa-heart';
-                        countSpan.textContent = Math.max(0, parseInt(countSpan.textContent) - 1);
-                    }
-                    alert('Failed to save like. Please try again.');
-                }
-            });
-
-            return div;
-        }
-
-        // ── BUILD POST CARD ──
-        function buildPostCard(post, id) {
-            const isLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]').includes(id);
-            const card = document.createElement('div');
-            card.className = 'post-card';
-            card.dataset.id = id;
-
-            card.innerHTML = `
-                <span class="category-badge">${(post.category || 'misc').toUpperCase()}</span>
-                ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
-                <div class="post-title">${post.title}</div>
-                <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 120) + '...' || ''}</div>
-                <div class="post-tags">${(post.tags || []).slice(0, 3).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
-                <div class="post-footer">
-                    <span>${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleDateString() : 'Unknown'}</span>
-                    <div class="likes">
-                        <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
-                            <i class="fa${isLiked ? 's' : 'r'} fa-heart"></i>
-                            <span class="like-count">${post.likes || 0}</span>
-                        </button>
-                        <span><i class="far fa-comment"></i> ${post.commentCount || 0}</span>
-                    </div>
-                </div>
-            `;
-
-            card.addEventListener('click', (e) => {
-                if (!e.target.closest('button')) {
-                    window.location.href = `blog-post.html?id=${id}`;
-                }
-            });
-
-            // ── FIX: Like Button with Error Handling ──
-            const likeBtn = card.querySelector('.like-btn');
-            likeBtn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                const id = likeBtn.dataset.id;
-                const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-                const isCurrentlyLiked = likedPosts.includes(id);
-                const countSpan = likeBtn.querySelector('.like-count');
-                const icon = likeBtn.querySelector('i');
-
-                try {
-                    if (isCurrentlyLiked) {
-                        const newLiked = likedPosts.filter(p => p !== id);
-                        localStorage.setItem('liked_posts', JSON.stringify(newLiked));
-                        likeBtn.classList.remove('liked');
-                        icon.className = 'far fa-heart';
-                        countSpan.textContent = Math.max(0, parseInt(countSpan.textContent) - 1);
-                        await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
-                        console.log('✅ Disliked:', id);
-                    } else {
-                        likedPosts.push(id);
-                        localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
-                        likeBtn.classList.add('liked');
-                        icon.className = 'fas fa-heart';
-                        countSpan.textContent = parseInt(countSpan.textContent) + 1;
-                        await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
-                        console.log('✅ Liked:', id);
-                    }
-                } catch (err) {
-                    console.error('❌ Error updating like:', err);
-                    if (isCurrentlyLiked) {
-                        likedPosts.push(id);
-                        localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
-                        likeBtn.classList.add('liked');
-                        icon.className = 'fas fa-heart';
-                        countSpan.textContent = parseInt(countSpan.textContent) + 1;
-                    } else {
-                        const revertLiked = likedPosts.filter(p => p !== id);
-                        localStorage.setItem('liked_posts', JSON.stringify(revertLiked));
-                        likeBtn.classList.remove('liked');
-                        icon.className = 'far fa-heart';
-                        countSpan.textContent = Math.max(0, parseInt(countSpan.textContent) - 1);
-                    }
-                    alert('Failed to save like. Please try again.');
-                }
-            });
-
-            return card;
-        }
-
-        // ── LOAD POSTS ──
-        async function loadPosts() {
-            feed.innerHTML = '<div class="loading-spinner"></div>';
-
-            try {
-                const postsRef = collection(db, 'posts');
-                const q = query(postsRef, orderBy('createdAt', 'desc'));
-                const snap = await getDocs(q);
-
-                allPosts = [];
-                pinnedPost = null;
-
-                snap.forEach(doc => {
-                    const post = { ...doc.data(), id: doc.id };
-                    // ── FIX: Ensure likes field exists ──
-                    if (post.likes === undefined) {
-                        post.likes = 0;
-                    }
-                    if (post.commentCount === undefined) {
-                        post.commentCount = 0;
-                    }
-                    if (post.title && post.title.trim() === PINNED_TITLE) {
-                        pinnedPost = post;
-                    } else {
-                        allPosts.push(post);
-                    }
-                });
-
-                applyFiltersAndSort();
-
-            } catch (err) {
-                feed.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error: ${err.message}</p></div>`;
-                console.error(err);
+        div.addEventListener('click', (e) => {
+            if (!e.target.closest('button')) {
+                window.location.href = `blog-post.html?id=${id}`;
             }
-        }
+        });
 
-        // ── APPLY FILTERS & SORT ──
-        function applyFiltersAndSort() {
-            filteredPosts = allPosts.filter(post => {
-                if (currentFilter === 'all') return true;
-                return (post.category || 'misc').toLowerCase() === currentFilter;
-            });
+        // ── LIKE / DISLIKE ──
+       const likeBtn = div.querySelector('.like-btn');
+        likeBtn.addEventListener('click', async function(e) {
+            e.stopPropagation();
+            const id = this.dataset.id;
+            const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+            const isCurrentlyLiked = likedPosts.includes(id);
+            const countSpan = this.querySelector('.like-count');
+            const icon = this.querySelector('i');
+            let currentCount = parseInt(countSpan.textContent);
 
-            if (currentSort === 'popular') {
-                filteredPosts.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+            if (isCurrentlyLiked) {
+                if (currentCount <= 0) {
+                    console.log("⚠️ Cannot dislike - count is already 0");
+                    return;
+                }
+                const newLiked = likedPosts.filter(p => p !== id);
+                localStorage.setItem('liked_posts', JSON.stringify(newLiked));
+                this.classList.remove('liked');
+                icon.className = 'far fa-heart';
+                countSpan.textContent = currentCount - 1;
+                try {
+                    await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
+                    console.log("✅ Disliked - count:", currentCount - 1);
+                } catch (err) {
+                    console.error("❌ Error:", err);
+                    this.classList.add('liked');
+                    icon.className = 'fas fa-heart';
+                    countSpan.textContent = currentCount;
+                    likedPosts.push(id);
+                    localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
+                }
             } else {
-                filteredPosts.sort((a, b) => {
-                    const dateA = a.createdAt ? a.createdAt.toDate().getTime() : 0;
-                    const dateB = b.createdAt ? b.createdAt.toDate().getTime() : 0;
-                    return dateB - dateA;
-                });
+                likedPosts.push(id);
+                localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
+                this.classList.add('liked');
+                icon.className = 'fas fa-heart';
+                countSpan.textContent = currentCount + 1;
+                try {
+                    await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
+                    console.log("✅ Liked - count:", currentCount + 1);
+                } catch (err) {
+                    console.error("❌ Error:", err);
+                    this.classList.remove('liked');
+                    icon.className = 'far fa-heart';
+                    countSpan.textContent = currentCount;
+                    const revertLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+                    const index = revertLiked.indexOf(id);
+                    if (index > -1) revertLiked.splice(index, 1);
+                    localStorage.setItem('liked_posts', JSON.stringify(revertLiked));
+                }
             }
+        });
 
-            totalPosts = filteredPosts.length;
-            renderPage(1);
+        return div;
+    }
+
+    // ── BUILD POST CARD ──
+    function buildPostCard(post, id) {
+        const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+        const isLiked = likedPosts.includes(id);
+        const likeCount = post.likes || 0;
+        
+        const card = document.createElement('div');
+        card.className = 'post-card';
+        card.dataset.category = post.category || 'misc';
+        card.dataset.postId = id;
+
+        card.innerHTML = `
+            <div class="post-header">
+                <div class="post-avatar">A</div>
+                <div>
+                    <div style="font-weight:700;">AlphaX</div>
+                    <div style="color:var(--text-muted);font-size:0.8rem;">${post.category || 'Misc'}</div>
+                </div>
+            </div>
+            <div class="post-title" onclick="window.location.href='blog-post.html?id=${id}'">${post.title}</div>
+            <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 150) + '...' || ''}</div>
+            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
+            <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
+            <div class="post-actions">
+                <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
+                    <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
+                    <span class="like-count">${likeCount}</span>
+                </button>
+                <button onclick="window.location.href='blog-post.html?id=${id}'">
+                    <i class="far fa-comment"></i> ${post.commentCount || 0}
+                </button>
+                <button onclick="navigator.clipboard.writeText('https://alphax22.web.app/blog-post.html?id=${id}')">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+            </div>
+        `;
+
+        card.addEventListener('click', (e) => {
+            if (!e.target.closest('button')) {
+                window.location.href = `blog-post.html?id=${id}`;
+            }
+        });
+
+        // ── LIKE / DISLIKE ──
+        const likeBtn = card.querySelector('.like-btn');
+        likeBtn.addEventListener('click', async function(e) {
+            e.stopPropagation();
+            const id = this.dataset.id;
+            const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+            const isCurrentlyLiked = likedPosts.includes(id);
+            const countSpan = this.querySelector('.like-count');
+            const icon = this.querySelector('i');
+            let currentCount = parseInt(countSpan.textContent);
+
+            if (isCurrentlyLiked) {
+                if (currentCount <= 0) {
+                    console.log("⚠️ Cannot dislike - count is already 0");
+                    return;
+                }
+                const newLiked = likedPosts.filter(p => p !== id);
+                localStorage.setItem('liked_posts', JSON.stringify(newLiked));
+                this.classList.remove('liked');
+                icon.className = 'far fa-heart';
+                countSpan.textContent = currentCount - 1;
+                try {
+                    await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
+                    console.log("✅ Disliked - count:", currentCount - 1);
+                } catch (err) {
+                    console.error("❌ Error:", err);
+                    this.classList.add('liked');
+                    icon.className = 'fas fa-heart';
+                    countSpan.textContent = currentCount;
+                    likedPosts.push(id);
+                    localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
+                }
+            } else {
+                likedPosts.push(id);
+                localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
+                this.classList.add('liked');
+                icon.className = 'fas fa-heart';
+                countSpan.textContent = currentCount + 1;
+                try {
+                    await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
+                    console.log("✅ Liked - count:", currentCount + 1);
+                } catch (err) {
+                    console.error("❌ Error:", err);
+                    this.classList.remove('liked');
+                    icon.className = 'far fa-heart';
+                    countSpan.textContent = currentCount;
+                    const revertLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+                    const index = revertLiked.indexOf(id);
+                    if (index > -1) revertLiked.splice(index, 1);
+                    localStorage.setItem('liked_posts', JSON.stringify(revertLiked));
+                }
+            }
+        });
+
+        return card;
+    }
+
+    // ── LOAD POSTS ──
+    async function loadPosts() {
+        feed.innerHTML = '<div class="loading-spinner"></div>';
+
+        try {
+            const postsRef = collection(db, 'posts');
+            const q = query(postsRef, orderBy('createdAt', 'desc'));
+            const snap = await getDocs(q);
+
+            allPosts = [];
+            pinnedPost = null;
+
+            snap.forEach(doc => {
+                const post = { ...doc.data(), id: doc.id };
+                if (post.title && post.title.trim() === PINNED_TITLE) {
+                    pinnedPost = post;
+                } else {
+                    allPosts.push(post);
+                }
+            });
+
+            applyFiltersAndSort();
+
+        } catch (err) {
+            feed.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error: ${err.message}</p></div>`;
+            console.error(err);
+        }
+    }
+
+    // ── APPLY FILTERS & SORT ──
+    function applyFiltersAndSort() {
+        filteredPosts = allPosts.filter(post => {
+            if (currentFilter === 'all') return true;
+            return (post.category || 'misc').toLowerCase() === currentFilter;
+        });
+
+        if (currentSort === 'popular') {
+            filteredPosts.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+        } else {
+            filteredPosts.sort((a, b) => {
+                const dateA = a.createdAt ? a.createdAt.toDate().getTime() : 0;
+                const dateB = b.createdAt ? b.createdAt.toDate().getTime() : 0;
+                return dateB - dateA;
+            });
+        }
+
+        totalPosts = filteredPosts.length;
+        renderPage(1);
+        renderPagination();
+    }
+
+    // ── RENDER PAGE ──
+    function renderPage(page) {
+        currentPage = page;
+        const start = (page - 1) * POSTS_PER_PAGE;
+        const end = start + POSTS_PER_PAGE;
+        const pagePosts = filteredPosts.slice(start, end);
+
+        feed.innerHTML = '';
+
+        if (pinnedPost) {
+            feed.appendChild(buildPinnedPost(pinnedPost, pinnedPost.id));
+        }
+
+        if (pagePosts.length === 0 && !pinnedPost) {
+            feed.innerHTML = `<div class="empty-state"><i class="fas fa-terminal"></i><p>No posts found.</p></div>`;
+            return;
+        }
+
+        if (pagePosts.length > 0) {
+            const grid = document.createElement('div');
+            grid.className = 'posts-grid';
+            pagePosts.forEach(post => {
+                grid.appendChild(buildPostCard(post, post.id));
+            });
+            feed.appendChild(grid);
+        }
+    }
+
+    // ── RENDER PAGINATION ──
+    function renderPagination() {
+        const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
+        pagination.innerHTML = '';
+
+        if (totalPages <= 1) return;
+
+        const prevBtn = document.createElement('button');
+        prevBtn.textContent = '‹';
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 1) renderPage(currentPage - 1);
             renderPagination();
-        }
-
-        // ── RENDER PAGE ──
-        function renderPage(page) {
-            currentPage = page;
-            const start = (page - 1) * POSTS_PER_PAGE;
-            const end = start + POSTS_PER_PAGE;
-            const pagePosts = filteredPosts.slice(start, end);
-
-            feed.innerHTML = '';
-
-            if (pinnedPost) {
-                feed.appendChild(buildPinnedPost(pinnedPost, pinnedPost.id));
-            }
-
-            if (pagePosts.length === 0 && !pinnedPost) {
-                feed.innerHTML = `<div class="empty-state"><i class="fas fa-terminal"></i><p>No posts found.</p></div>`;
-                return;
-            }
-
-            if (pagePosts.length > 0) {
-                const grid = document.createElement('div');
-                grid.className = 'posts-grid';
-                pagePosts.forEach(post => {
-                    grid.appendChild(buildPostCard(post, post.id));
-                });
-                feed.appendChild(grid);
-            }
-        }
-
-        // ── RENDER PAGINATION ──
-        function renderPagination() {
-            const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
-            pagination.innerHTML = '';
-
-            if (totalPages <= 1) return;
-
-            const prevBtn = document.createElement('button');
-            prevBtn.textContent = '‹';
-            prevBtn.disabled = currentPage === 1;
-            prevBtn.addEventListener('click', () => {
-                if (currentPage > 1) renderPage(currentPage - 1);
-                renderPagination();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-            pagination.appendChild(prevBtn);
-
-            let startPage = Math.max(1, currentPage - 2);
-            let endPage = Math.min(totalPages, currentPage + 2);
-
-            if (endPage - startPage < 4) {
-                if (startPage > 1) startPage = Math.max(1, endPage - 4);
-                if (endPage < totalPages) endPage = Math.min(totalPages, startPage + 4);
-            }
-
-            if (startPage > 1) {
-                const firstBtn = document.createElement('button');
-                firstBtn.textContent = '1';
-                firstBtn.addEventListener('click', () => { renderPage(1); renderPagination(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
-                pagination.appendChild(firstBtn);
-                if (startPage > 2) {
-                    const dots = document.createElement('button');
-                    dots.textContent = '…';
-                    dots.disabled = true;
-                    pagination.appendChild(dots);
-                }
-            }
-
-            for (let i = startPage; i <= endPage; i++) {
-                const btn = document.createElement('button');
-                btn.textContent = i;
-                if (i === currentPage) btn.classList.add('active');
-                btn.addEventListener('click', () => { renderPage(i); renderPagination(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
-                pagination.appendChild(btn);
-            }
-
-            if (endPage < totalPages) {
-                if (endPage < totalPages - 1) {
-                    const dots = document.createElement('button');
-                    dots.textContent = '…';
-                    dots.disabled = true;
-                    pagination.appendChild(dots);
-                }
-                const lastBtn = document.createElement('button');
-                lastBtn.textContent = totalPages;
-                lastBtn.addEventListener('click', () => { renderPage(totalPages); renderPagination(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
-                pagination.appendChild(lastBtn);
-            }
-
-            const nextBtn = document.createElement('button');
-            nextBtn.textContent = '›';
-            nextBtn.disabled = currentPage === totalPages;
-            nextBtn.addEventListener('click', () => {
-                if (currentPage < totalPages) renderPage(currentPage + 1);
-                renderPagination();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-            pagination.appendChild(nextBtn);
-        }
-
-        // ── FILTER BUTTONS ──
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                currentFilter = this.dataset.filter;
-                applyFiltersAndSort();
-            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
+        pagination.appendChild(prevBtn);
 
-        // ── SORT BUTTONS ──
-        document.querySelectorAll('.sort-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                currentSort = this.dataset.sort;
-                applyFiltersAndSort();
-            });
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+
+        if (endPage - startPage < 4) {
+            if (startPage > 1) startPage = Math.max(1, endPage - 4);
+            if (endPage < totalPages) endPage = Math.min(totalPages, startPage + 4);
+        }
+
+        if (startPage > 1) {
+            const firstBtn = document.createElement('button');
+            firstBtn.textContent = '1';
+            firstBtn.addEventListener('click', () => { renderPage(1); renderPagination(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+            pagination.appendChild(firstBtn);
+            if (startPage > 2) {
+                const dots = document.createElement('button');
+                dots.textContent = '…';
+                dots.disabled = true;
+                pagination.appendChild(dots);
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const btn = document.createElement('button');
+            btn.textContent = i;
+            if (i === currentPage) btn.classList.add('active');
+            btn.addEventListener('click', () => { renderPage(i); renderPagination(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+            pagination.appendChild(btn);
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const dots = document.createElement('button');
+                dots.textContent = '…';
+                dots.disabled = true;
+                pagination.appendChild(dots);
+            }
+            const lastBtn = document.createElement('button');
+            lastBtn.textContent = totalPages;
+            lastBtn.addEventListener('click', () => { renderPage(totalPages); renderPagination(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+            pagination.appendChild(lastBtn);
+        }
+
+        const nextBtn = document.createElement('button');
+        nextBtn.textContent = '›';
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.addEventListener('click', () => {
+            if (currentPage < totalPages) renderPage(currentPage + 1);
+            renderPagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
+        pagination.appendChild(nextBtn);
+    }
 
-        // ── THEME TOGGLE ──
+    // ── FILTER BUTTONS ──
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.dataset.filter;
+            applyFiltersAndSort();
+        });
+    });
+
+    // ── SORT BUTTONS ──
+    document.querySelectorAll('.sort-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentSort = this.dataset.sort;
+            applyFiltersAndSort();
+        });
+    });
+
+    // ── THEME TOGGLE ──
         const themeToggle = document.getElementById('theme-toggle');
-        const html = document.documentElement;
-        const saved = localStorage.getItem('theme') || 'dark';
-        html.setAttribute('data-theme', saved);
-        themeToggle.innerHTML = saved === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-        themeToggle.addEventListener('click', () => {
-            const cur = html.getAttribute('data-theme');
-            const next = cur === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
-            themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon</i>';
-        });
+    const html = document.documentElement;
+    const saved = localStorage.getItem('theme') || 'dark';
+    html.setAttribute('data-theme', saved);
+    themeToggle.innerHTML = saved === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    themeToggle.addEventListener('click', () => {
+        const cur = html.getAttribute('data-theme');
+        const next = cur === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    });
 
-        // ── MOBILE NAV ──
-        document.getElementById('hamburger').addEventListener('click', () => {
-            document.getElementById('nav-links').classList.toggle('active');
-        });
+    // ── MOBILE NAV ──
+    document.getElementById('hamburger').addEventListener('click', () => {
+        document.getElementById('nav-links').classList.toggle('active');
+    });
 
-        // ── INIT ──
-        loadPosts();
+    // ── INIT ──
+    loadPosts();
     </script>
 </body>
 </html>
-    
