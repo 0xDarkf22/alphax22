@@ -30,7 +30,6 @@
         a { text-decoration: none; color: inherit; }
         ul { list-style: none; }
 
-        /* ── HEADER ── */
         .nav-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -48,7 +47,6 @@
         #theme-toggle { background: none; border: none; color: var(--text-main); font-size: 1.2rem; cursor: pointer; }
         .hamburger { display: none; font-size: 1.5rem; cursor: pointer; color: var(--text-main); }
 
-        /* ── BLOG ── */
         .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
 
         .blog-header {
@@ -62,32 +60,12 @@
         .blog-header h1 { font-size: 2.2rem; }
         .blog-header p { color: var(--text-muted); }
 
-        /* ── FILTERS & SORT ── */
         .controls {
             display: flex;
             flex-wrap: wrap;
             gap: 1rem;
             margin-bottom: 2rem;
             align-items: center;
-        }
-        .controls select, .controls button {
-            padding: 0.5rem 1rem;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .controls select:hover, .controls button:hover {
-            border-color: var(--accent-color);
-        }
-        .controls button.active {
-            border-color: var(--accent-color);
-            background: rgba(13,148,136,0.1);
-            color: var(--accent-color);
         }
         .filter-buttons {
             display: flex;
@@ -96,14 +74,139 @@
         }
         .filter-buttons button {
             padding: 0.3rem 1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
             border-radius: 20px;
+            font-family: inherit;
             font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .filter-buttons button:hover,
+        .filter-buttons button.active {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            background: rgba(13,148,136,0.1);
         }
         .sort-options {
             display: flex;
             gap: 0.5rem;
             margin-left: auto;
         }
+        .sort-options button {
+            padding: 0.3rem 1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .sort-options button:hover,
+        .sort-options button.active {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            background: rgba(13,148,136,0.1);
+        }
+
+        /* ── PINNED POST ── */
+        .pinned-post {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+        }
+        .pinned-post:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(13,148,136,0.15);
+        }
+        /* ── PREVENT HOVER FLASH ON CLICK ── */
+        .pinned-post:active {
+            transform: none !important;
+            border-color: var(--accent-color) !important;
+            box-shadow: none !important;
+        }
+        .pinned-post .pinned-badge {
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background: var(--accent-color);
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.2rem 0.8rem;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+        }
+        .pinned-post .category-badge {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.6rem;
+            border-radius: 12px;
+            background: rgba(13,148,136,0.15);
+            color: var(--accent-color);
+            border: 1px solid rgba(13,148,136,0.2);
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+        .pinned-post .post-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .pinned-post .post-title:hover { color: var(--accent-color); }
+        .pinned-post .post-excerpt {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        .pinned-post .post-image {
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        .pinned-post .post-image img {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            display: block;
+        }
+        .pinned-post .post-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            margin: 0.5rem 0;
+        }
+        .pinned-post .post-tag {
+            font-size: 0.65rem;
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+            background: rgba(13,148,136,0.08);
+            color: var(--accent-color);
+            border: 1px solid rgba(13,148,136,0.15);
+        }
+        .pinned-post .post-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .pinned-post .post-footer .likes {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .pinned-post .post-footer .likes i { color: #ef4444; }
 
         /* ── POSTS GRID ── */
         .posts-grid {
@@ -123,12 +226,20 @@
             cursor: pointer;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
         .post-card:hover {
             border-color: var(--accent-color);
             transform: translateY(-4px);
             box-shadow: 0 8px 30px rgba(0,0,0,0.3);
         }
+        /* ── PREVENT HOVER FLASH ON CLICK ── */
+        .post-card:active {
+            transform: none !important;
+            border-color: var(--border-color) !important;
+            box-shadow: none !important;
+        }
+
         .post-card .category-badge {
             font-size: 0.7rem;
             padding: 0.15rem 0.6rem;
@@ -198,6 +309,40 @@
         }
         .post-card .post-footer .likes i { color: #ef4444; }
 
+        /* ── LIKE BUTTON ── */
+        .post-card .like-btn,
+        .pinned-post .like-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            transition: 0.2s;
+            opacity: 0.4;
+            font-family: inherit;
+        }
+        .post-card:hover .like-btn,
+        .pinned-post:hover .like-btn {
+            opacity: 1;
+        }
+        .post-card .like-btn:hover,
+        .pinned-post .like-btn:hover {
+            background: rgba(239,68,68,0.1);
+        }
+        .post-card .like-btn.liked,
+        .pinned-post .like-btn.liked {
+            opacity: 1;
+        }
+        .post-card .like-btn.liked i,
+        .pinned-post .like-btn.liked i {
+            color: #ef4444;
+        }
+
         /* ── PAGINATION ── */
         .pagination {
             display: flex;
@@ -258,7 +403,6 @@
             margin-top: 2rem;
         }
 
-        /* ── RESPONSIVE ── */
         @media (max-width: 768px) {
             .nav-links { display: none; }
             .hamburger { display: block; }
@@ -266,6 +410,8 @@
             .sort-options { margin-left: 0; }
             .posts-grid { grid-template-columns: 1fr; }
             .blog-header { flex-direction: column; align-items: flex-start; }
+            .pinned-post { padding: 1rem; }
+            .pinned-post .post-title { font-size: 1.2rem; }
         }
         @media (min-width: 769px) and (max-width: 1024px) {
             .posts-grid { grid-template-columns: repeat(2, 1fr); }
@@ -277,7 +423,6 @@
 </head>
 <body>
 
-    <!-- HEADER -->
     <header>
         <nav class="nav-container">
             <div class="logo"><a href="index.html">0xAlpha22</a></div>
@@ -297,10 +442,8 @@
         </nav>
     </header>
 
-    <!-- MAIN CONTENT -->
     <main>
         <div class="container">
-            <!-- Header -->
             <div class="blog-header">
                 <div>
                     <h1>Posts & Research</h1>
@@ -308,9 +451,7 @@
                 </div>
             </div>
 
-            <!-- Controls -->
             <div class="controls">
-                <!-- Category Filter -->
                 <div class="filter-buttons">
                     <button class="filter-btn active" data-filter="all">All</button>
                     <button class="filter-btn" data-filter="ctf">CTF</button>
@@ -319,33 +460,29 @@
                     <button class="filter-btn" data-filter="tools">Tools</button>
                     <button class="filter-btn" data-filter="misc">Misc</button>
                 </div>
-
-                <!-- Sort Options -->
                 <div class="sort-options">
                     <button class="sort-btn active" data-sort="recent">📅 Recent</button>
                     <button class="sort-btn" data-sort="popular">🔥 Popular</button>
                 </div>
             </div>
 
-            <!-- Posts Grid -->
             <div id="posts-feed">
                 <div class="loading-spinner"></div>
             </div>
 
-            <!-- Pagination -->
             <div class="pagination" id="pagination"></div>
         </div>
     </main>
 
     <footer>
-        <p>© 2026 AlphaX. All rights reserved.</p>
+  <p>© 2026 AlphaX. All rights reserved.</p>
     </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { 
             getFirestore, collection, doc, updateDoc, increment,
-            query, orderBy, getDocs, limit, startAfter, where
+            query, orderBy, getDocs
         } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -370,8 +507,69 @@
         const POSTS_PER_PAGE = 6;
         let allPosts = [];
         let filteredPosts = [];
+        let pinnedPost = null;
+        const PINNED_TITLE = "Whoami - a 17-year old cybersecurity researcher";
 
-        // ── BUILD POST CARD ──
+        function buildPinnedPost(post, id) {
+            const isLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]').includes(id);
+            const div = document.createElement('div');
+            div.className = 'pinned-post';
+            div.dataset.id = id;
+
+            div.innerHTML = `
+                <span class="pinned-badge">📌 PINNED</span>
+                <span class="category-badge">${(post.category || 'misc').toUpperCase()}</span>
+                ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
+                <div class="post-title">${post.title}</div>
+                <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 200) + '...' || ''}</div>
+                <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
+                <div class="post-footer">
+                    <span>${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleDateString() : 'Unknown'}</span>
+                    <div class="likes">
+                        <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
+                            <i class="fa${isLiked ? 's' : 'r'} fa-heart"></i>
+                            <span class="like-count">${post.likes || 0}</span>
+                        </button>
+                        <span><i class="far fa-comment"></i> ${post.commentCount || 0}</span>
+                    </div>
+                </div>
+            `;
+
+            div.addEventListener('click', (e) => {
+                if (!e.target.closest('button')) {
+                    window.location.href = `blog-post.html?id=${id}`;
+                }
+            });
+
+            const likeBtn = div.querySelector('.like-btn');
+            likeBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const id = likeBtn.dataset.id;
+                const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+                const isCurrentlyLiked = likedPosts.includes(id);
+                const countSpan = likeBtn.querySelector('.like-count');
+                const icon = likeBtn.querySelector('i');
+
+                if (isCurrentlyLiked) {
+                    const newLiked = likedPosts.filter(p => p !== id);
+                    localStorage.setItem('liked_posts', JSON.stringify(newLiked));
+                    likeBtn.classList.remove('liked');
+                    icon.className = 'far fa-heart';
+                    countSpan.textContent = parseInt(countSpan.textContent) - 1;
+                    await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
+                } else {
+                    likedPosts.push(id);
+                    localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
+                    likeBtn.classList.add('liked');
+                    icon.className = 'fas fa-heart';
+                    countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                    await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
+                }
+            });
+
+            return div;
+        }
+
         function buildPostCard(post, id) {
             const isLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]').includes(id);
             const card = document.createElement('div');
@@ -387,8 +585,8 @@
                 <div class="post-footer">
                     <span>${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleDateString() : 'Unknown'}</span>
                     <div class="likes">
-                        <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:0.8rem;display:flex;align-items:center;gap:0.2rem;">
-                            <i class="fa${isLiked ? 's' : 'r'} fa-heart" style="color:${isLiked ? '#ef4444' : 'var(--text-muted)'};"></i>
+                        <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
+                            <i class="fa${isLiked ? 's' : 'r'} fa-heart"></i>
                             <span class="like-count">${post.likes || 0}</span>
                         </button>
                         <span><i class="far fa-comment"></i> ${post.commentCount || 0}</span>
@@ -396,14 +594,12 @@
                 </div>
             `;
 
-            // Click to open post
             card.addEventListener('click', (e) => {
                 if (!e.target.closest('button')) {
                     window.location.href = `blog-post.html?id=${id}`;
                 }
             });
 
-            // Like button
             const likeBtn = card.querySelector('.like-btn');
             likeBtn.addEventListener('click', async (e) => {
                 e.stopPropagation();
@@ -418,7 +614,6 @@
                     localStorage.setItem('liked_posts', JSON.stringify(newLiked));
                     likeBtn.classList.remove('liked');
                     icon.className = 'far fa-heart';
-                    icon.style.color = 'var(--text-muted)';
                     countSpan.textContent = parseInt(countSpan.textContent) - 1;
                     await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
                 } else {
@@ -426,7 +621,6 @@
                     localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
                     likeBtn.classList.add('liked');
                     icon.className = 'fas fa-heart';
-                    icon.style.color = '#ef4444';
                     countSpan.textContent = parseInt(countSpan.textContent) + 1;
                     await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
                 }
@@ -435,7 +629,6 @@
             return card;
         }
 
-        // ── LOAD POSTS ──
         async function loadPosts() {
             feed.innerHTML = '<div class="loading-spinner"></div>';
 
@@ -445,8 +638,15 @@
                 const snap = await getDocs(q);
 
                 allPosts = [];
+                pinnedPost = null;
+
                 snap.forEach(doc => {
-                    allPosts.push({ ...doc.data(), id: doc.id });
+                    const post = { ...doc.data(), id: doc.id };
+                    if (post.title && post.title.trim() === PINNED_TITLE) {
+                        pinnedPost = post;
+                    } else {
+                        allPosts.push(post);
+                    }
                 });
 
                 applyFiltersAndSort();
@@ -457,19 +657,15 @@
             }
         }
 
-        // ── APPLY FILTERS & SORT ──
         function applyFiltersAndSort() {
-            // Filter
             filteredPosts = allPosts.filter(post => {
                 if (currentFilter === 'all') return true;
                 return (post.category || 'misc').toLowerCase() === currentFilter;
             });
 
-            // Sort
             if (currentSort === 'popular') {
                 filteredPosts.sort((a, b) => (b.likes || 0) - (a.likes || 0));
             } else {
-                // Recent (default) - already sorted by createdAt
                 filteredPosts.sort((a, b) => {
                     const dateA = a.createdAt ? a.createdAt.toDate().getTime() : 0;
                     const dateB = b.createdAt ? b.createdAt.toDate().getTime() : 0;
@@ -482,7 +678,6 @@
             renderPagination();
         }
 
-        // ── RENDER PAGE ──
         function renderPage(page) {
             currentPage = page;
             const start = (page - 1) * POSTS_PER_PAGE;
@@ -491,25 +686,31 @@
 
             feed.innerHTML = '';
 
-            if (pagePosts.length === 0) {
+            if (pinnedPost) {
+                feed.appendChild(buildPinnedPost(pinnedPost, pinnedPost.id));
+            }
+
+            if (pagePosts.length === 0 && !pinnedPost) {
                 feed.innerHTML = `<div class="empty-state"><i class="fas fa-terminal"></i><p>No posts found.</p></div>`;
                 return;
             }
 
-            pagePosts.forEach(post => {
-                const card = buildPostCard(post, post.id);
-                feed.appendChild(card);
-            });
+            if (pagePosts.length > 0) {
+                const grid = document.createElement('div');
+                grid.className = 'posts-grid';
+                pagePosts.forEach(post => {
+                    grid.appendChild(buildPostCard(post, post.id));
+                });
+                feed.appendChild(grid);
+            }
         }
 
-        // ── RENDER PAGINATION ──
         function renderPagination() {
             const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
             pagination.innerHTML = '';
 
             if (totalPages <= 1) return;
 
-            // Previous
             const prevBtn = document.createElement('button');
             prevBtn.textContent = '‹';
             prevBtn.disabled = currentPage === 1;
@@ -520,7 +721,6 @@
             });
             pagination.appendChild(prevBtn);
 
-                  // Page numbers
             let startPage = Math.max(1, currentPage - 2);
             let endPage = Math.min(totalPages, currentPage + 2);
 
@@ -563,7 +763,6 @@
                 pagination.appendChild(lastBtn);
             }
 
-            // Next
             const nextBtn = document.createElement('button');
             nextBtn.textContent = '›';
             nextBtn.disabled = currentPage === totalPages;
@@ -575,7 +774,6 @@
             pagination.appendChild(nextBtn);
         }
 
-        // ── FILTER BUTTONS ──
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -585,7 +783,6 @@
             });
         });
 
-        // ── SORT BUTTONS ──
         document.querySelectorAll('.sort-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
@@ -595,7 +792,6 @@
             });
         });
 
-        // ── THEME TOGGLE ──
         const themeToggle = document.getElementById('theme-toggle');
         const html = document.documentElement;
         const saved = localStorage.getItem('theme') || 'dark';
@@ -609,12 +805,10 @@
             themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
         });
 
-        // ── MOBILE NAV ──
         document.getElementById('hamburger').addEventListener('click', () => {
             document.getElementById('nav-links').classList.toggle('active');
         });
 
-        // ── INIT ──
         loadPosts();
     </script>
 </body>
