@@ -112,7 +112,6 @@
             background: rgba(13,148,136,0.1);
         }
 
-        /* ── PINNED POST ── */
         .pinned-post {
             background: var(--card-bg);
             border: 2px solid var(--accent-color);
@@ -127,7 +126,6 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 30px rgba(13,148,136,0.15);
         }
-        /* ── PREVENT HOVER FLASH ON CLICK ── */
         .pinned-post:active {
             transform: none !important;
             border-color: var(--accent-color) !important;
@@ -208,7 +206,6 @@
         }
         .pinned-post .post-footer .likes i { color: #ef4444; }
 
-        /* ── POSTS GRID ── */
         .posts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -216,7 +213,6 @@
             margin-bottom: 2rem;
         }
 
-        /* ── POST CARD ── */
         .post-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -233,13 +229,11 @@
             transform: translateY(-4px);
             box-shadow: 0 8px 30px rgba(0,0,0,0.3);
         }
-        /* ── PREVENT HOVER FLASH ON CLICK ── */
         .post-card:active {
             transform: none !important;
             border-color: var(--border-color) !important;
             box-shadow: none !important;
         }
-
         .post-card .category-badge {
             font-size: 0.7rem;
             padding: 0.15rem 0.6rem;
@@ -309,7 +303,6 @@
         }
         .post-card .post-footer .likes i { color: #ef4444; }
 
-        /* ── LIKE BUTTON ── */
         .post-card .like-btn,
         .pinned-post .like-btn {
             background: none;
@@ -343,7 +336,6 @@
             color: #ef4444;
         }
 
-        /* ── PAGINATION ── */
         .pagination {
             display: flex;
             justify-content: center;
@@ -475,9 +467,8 @@
     </main>
 
     <footer>
-  <p>© 2026 AlphaX. All rights reserved.</p>
+        <p>© 2026 AlphaX. All rights reserved.</p>
     </footer>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { 
@@ -510,6 +501,7 @@
         let pinnedPost = null;
         const PINNED_TITLE = "Whoami - a 17-year old cybersecurity researcher";
 
+        // ── BUILD PINNED POST ──
         function buildPinnedPost(post, id) {
             const isLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]').includes(id);
             const div = document.createElement('div');
@@ -541,6 +533,7 @@
                 }
             });
 
+            // ── FIX: Like Button with Error Handling ──
             const likeBtn = div.querySelector('.like-btn');
             likeBtn.addEventListener('click', async (e) => {
                 e.stopPropagation();
@@ -550,26 +543,47 @@
                 const countSpan = likeBtn.querySelector('.like-count');
                 const icon = likeBtn.querySelector('i');
 
-                if (isCurrentlyLiked) {
-                    const newLiked = likedPosts.filter(p => p !== id);
-                    localStorage.setItem('liked_posts', JSON.stringify(newLiked));
-                    likeBtn.classList.remove('liked');
-                    icon.className = 'far fa-heart';
-                    countSpan.textContent = parseInt(countSpan.textContent) - 1;
-                    await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
-                } else {
-                    likedPosts.push(id);
-                    localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
-                    likeBtn.classList.add('liked');
-                    icon.className = 'fas fa-heart';
-                    countSpan.textContent = parseInt(countSpan.textContent) + 1;
-                    await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
+                try {
+                    if (isCurrentlyLiked) {
+                        const newLiked = likedPosts.filter(p => p !== id);
+                        localStorage.setItem('liked_posts', JSON.stringify(newLiked));
+                        likeBtn.classList.remove('liked');
+                        icon.className = 'far fa-heart';
+                        countSpan.textContent = Math.max(0, parseInt(countSpan.textContent) - 1);
+                        await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
+                        console.log('✅ Disliked:', id);
+                    } else {
+                        likedPosts.push(id);
+                        localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
+                        likeBtn.classList.add('liked');
+                        icon.className = 'fas fa-heart';
+                        countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                        await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
+                        console.log('✅ Liked:', id);
+                    }
+                } catch (err) {
+                    console.error('❌ Error updating like:', err);
+                    if (isCurrentlyLiked) {
+                        likedPosts.push(id);
+                        localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
+                        likeBtn.classList.add('liked');
+                        icon.className = 'fas fa-heart';
+                        countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                    } else {
+                        const revertLiked = likedPosts.filter(p => p !== id);
+                        localStorage.setItem('liked_posts', JSON.stringify(revertLiked));
+                        likeBtn.classList.remove('liked');
+                        icon.className = 'far fa-heart';
+                        countSpan.textContent = Math.max(0, parseInt(countSpan.textContent) - 1);
+                    }
+                    alert('Failed to save like. Please try again.');
                 }
             });
 
             return div;
         }
 
+        // ── BUILD POST CARD ──
         function buildPostCard(post, id) {
             const isLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]').includes(id);
             const card = document.createElement('div');
@@ -600,6 +614,7 @@
                 }
             });
 
+            // ── FIX: Like Button with Error Handling ──
             const likeBtn = card.querySelector('.like-btn');
             likeBtn.addEventListener('click', async (e) => {
                 e.stopPropagation();
@@ -609,26 +624,47 @@
                 const countSpan = likeBtn.querySelector('.like-count');
                 const icon = likeBtn.querySelector('i');
 
-                if (isCurrentlyLiked) {
-                    const newLiked = likedPosts.filter(p => p !== id);
-                    localStorage.setItem('liked_posts', JSON.stringify(newLiked));
-                    likeBtn.classList.remove('liked');
-                    icon.className = 'far fa-heart';
-                    countSpan.textContent = parseInt(countSpan.textContent) - 1;
-                    await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
-                } else {
-                    likedPosts.push(id);
-                    localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
-                    likeBtn.classList.add('liked');
-                    icon.className = 'fas fa-heart';
-                    countSpan.textContent = parseInt(countSpan.textContent) + 1;
-                    await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
+                try {
+                    if (isCurrentlyLiked) {
+                        const newLiked = likedPosts.filter(p => p !== id);
+                        localStorage.setItem('liked_posts', JSON.stringify(newLiked));
+                        likeBtn.classList.remove('liked');
+                        icon.className = 'far fa-heart';
+                        countSpan.textContent = Math.max(0, parseInt(countSpan.textContent) - 1);
+                        await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
+                        console.log('✅ Disliked:', id);
+                    } else {
+                        likedPosts.push(id);
+                        localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
+                        likeBtn.classList.add('liked');
+                        icon.className = 'fas fa-heart';
+                        countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                        await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
+                        console.log('✅ Liked:', id);
+                    }
+                } catch (err) {
+                    console.error('❌ Error updating like:', err);
+                    if (isCurrentlyLiked) {
+                        likedPosts.push(id);
+                        localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
+                        likeBtn.classList.add('liked');
+                        icon.className = 'fas fa-heart';
+                        countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                    } else {
+                        const revertLiked = likedPosts.filter(p => p !== id);
+                        localStorage.setItem('liked_posts', JSON.stringify(revertLiked));
+                        likeBtn.classList.remove('liked');
+                        icon.className = 'far fa-heart';
+                        countSpan.textContent = Math.max(0, parseInt(countSpan.textContent) - 1);
+                    }
+                    alert('Failed to save like. Please try again.');
                 }
             });
 
             return card;
         }
 
+        // ── LOAD POSTS ──
         async function loadPosts() {
             feed.innerHTML = '<div class="loading-spinner"></div>';
 
@@ -642,6 +678,13 @@
 
                 snap.forEach(doc => {
                     const post = { ...doc.data(), id: doc.id };
+                    // ── FIX: Ensure likes field exists ──
+                    if (post.likes === undefined) {
+                        post.likes = 0;
+                    }
+                    if (post.commentCount === undefined) {
+                        post.commentCount = 0;
+                    }
                     if (post.title && post.title.trim() === PINNED_TITLE) {
                         pinnedPost = post;
                     } else {
@@ -657,6 +700,7 @@
             }
         }
 
+        // ── APPLY FILTERS & SORT ──
         function applyFiltersAndSort() {
             filteredPosts = allPosts.filter(post => {
                 if (currentFilter === 'all') return true;
@@ -678,6 +722,7 @@
             renderPagination();
         }
 
+        // ── RENDER PAGE ──
         function renderPage(page) {
             currentPage = page;
             const start = (page - 1) * POSTS_PER_PAGE;
@@ -705,6 +750,7 @@
             }
         }
 
+        // ── RENDER PAGINATION ──
         function renderPagination() {
             const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
             pagination.innerHTML = '';
@@ -774,6 +820,7 @@
             pagination.appendChild(nextBtn);
         }
 
+        // ── FILTER BUTTONS ──
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -783,6 +830,7 @@
             });
         });
 
+        // ── SORT BUTTONS ──
         document.querySelectorAll('.sort-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
@@ -792,6 +840,7 @@
             });
         });
 
+        // ── THEME TOGGLE ──
         const themeToggle = document.getElementById('theme-toggle');
         const html = document.documentElement;
         const saved = localStorage.getItem('theme') || 'dark';
@@ -802,14 +851,17 @@
             const next = cur === 'dark' ? 'light' : 'dark';
             html.setAttribute('data-theme', next);
             localStorage.setItem('theme', next);
-            themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon</i>';
         });
 
+        // ── MOBILE NAV ──
         document.getElementById('hamburger').addEventListener('click', () => {
             document.getElementById('nav-links').classList.toggle('active');
         });
 
+        // ── INIT ──
         loadPosts();
     </script>
 </body>
 </html>
+    
