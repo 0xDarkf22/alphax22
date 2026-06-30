@@ -14,7 +14,6 @@
 
         .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
 
-        /* ── HEADER ── */
         .nav-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -33,7 +32,6 @@
         .hamburger { display: none; font-size: 1.5rem; cursor: pointer; color: var(--text-main); }
         @media (max-width: 768px) { .nav-links { display: none; } .hamburger { display: block; } }
 
-        /* ── BLOG ── */
         .blog-header {
             display: flex;
             justify-content: space-between;
@@ -45,7 +43,6 @@
         .blog-header h1 { font-size: 2.2rem; }
         .blog-header p { color: var(--text-muted); }
 
-        /* ── CONTROLS ── */
         .controls {
             display: flex;
             flex-wrap: wrap;
@@ -86,7 +83,6 @@
             background: rgba(13,148,136,0.1);
         }
 
-        /* ── PINNED POST ── */
         .pinned-post {
             background: var(--card-bg);
             border: 2px solid var(--accent-color);
@@ -189,7 +185,6 @@
         .pinned-post .post-actions button.liked { color: #ef4444; }
         .pinned-post .post-actions button.liked i { color: #ef4444; }
 
-        /* ── POSTS GRID ── */
         .posts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -197,7 +192,6 @@
             margin-bottom: 2rem;
         }
 
-        /* ── POST CARD ── */
         .post-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -298,7 +292,6 @@
         .post-card .post-actions button.liked { color: #ef4444; }
         .post-card .post-actions button.liked i { color: #ef4444; }
 
-        /* ── PAGINATION ── */
         .pagination {
             display: flex;
             justify-content: center;
@@ -332,7 +325,6 @@
             cursor: not-allowed;
         }
 
-        /* ── LOADING & EMPTY ── */
         .loading-spinner {
             width: 40px;
             height: 40px;
@@ -429,7 +421,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
         getFirestore, collection, doc, updateDoc, increment, 
-        query, orderBy, getDocs
+        query, orderBy, onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -502,7 +494,7 @@
         });
 
         // ── LIKE / DISLIKE ──
-       const likeBtn = div.querySelector('.like-btn');
+        const likeBtn = div.querySelector('.like-btn');
         likeBtn.addEventListener('click', async function(e) {
             e.stopPropagation();
             const id = this.dataset.id;
@@ -658,19 +650,15 @@
         return card;
     }
 
-    // ── LOAD POSTS ──
-    async function loadPosts() {
-        feed.innerHTML = '<div class="loading-spinner"></div>';
-
-        try {
-            const postsRef = collection(db, 'posts');
-            const q = query(postsRef, orderBy('createdAt', 'desc'));
-            const snap = await getDocs(q);
-
+    // ── LOAD POSTS WITH REAL-TIME SYNC ──
+    function loadPosts() {
+        const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+        
+        onSnapshot(q, (snapshot) => {
             allPosts = [];
             pinnedPost = null;
 
-            snap.forEach(doc => {
+            snapshot.forEach(doc => {
                 const post = { ...doc.data(), id: doc.id };
                 if (post.title && post.title.trim() === PINNED_TITLE) {
                     pinnedPost = post;
@@ -680,11 +668,7 @@
             });
 
             applyFiltersAndSort();
-
-        } catch (err) {
-            feed.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error: ${err.message}</p></div>`;
-            console.error(err);
-        }
+        });
     }
 
     // ── APPLY FILTERS & SORT ──
@@ -828,7 +812,7 @@
     });
 
     // ── THEME TOGGLE ──
-        const themeToggle = document.getElementById('theme-toggle');
+    const themeToggle = document.getElementById('theme-toggle');
     const html = document.documentElement;
     const saved = localStorage.getItem('theme') || 'dark';
     html.setAttribute('data-theme', saved);
@@ -851,3 +835,5 @@
     </script>
 </body>
 </html>
+
+            
