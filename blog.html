@@ -504,46 +504,24 @@
             const icon = this.querySelector('i');
             let currentCount = parseInt(countSpan.textContent);
 
+            // ── CHECK localStorage FIRST ──
             if (isCurrentlyLiked) {
-                if (currentCount <= 0) {
-                    console.log("⚠️ Cannot dislike - count is already 0");
-                    return;
-                }
+                // DISLIKE
+                if (currentCount <= 0) return;
                 const newLiked = likedPosts.filter(p => p !== id);
                 localStorage.setItem('liked_posts', JSON.stringify(newLiked));
                 this.classList.remove('liked');
                 icon.className = 'far fa-heart';
                 countSpan.textContent = currentCount - 1;
-                try {
-                    await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
-                    console.log("✅ Disliked - count:", currentCount - 1);
-                } catch (err) {
-                    console.error("❌ Error:", err);
-                    this.classList.add('liked');
-                    icon.className = 'fas fa-heart';
-                    countSpan.textContent = currentCount;
-                    likedPosts.push(id);
-                    localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
-                }
+                await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
             } else {
+                // LIKE
                 likedPosts.push(id);
                 localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
                 this.classList.add('liked');
                 icon.className = 'fas fa-heart';
                 countSpan.textContent = currentCount + 1;
-                try {
-                    await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
-                    console.log("✅ Liked - count:", currentCount + 1);
-                } catch (err) {
-                    console.error("❌ Error:", err);
-                    this.classList.remove('liked');
-                    icon.className = 'far fa-heart';
-                    countSpan.textContent = currentCount;
-                    const revertLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-                    const index = revertLiked.indexOf(id);
-                    if (index > -1) revertLiked.splice(index, 1);
-                    localStorage.setItem('liked_posts', JSON.stringify(revertLiked));
-                }
+                await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
             }
         });
 
@@ -604,46 +582,24 @@
             const icon = this.querySelector('i');
             let currentCount = parseInt(countSpan.textContent);
 
+            // ── CHECK localStorage FIRST ──
             if (isCurrentlyLiked) {
-                if (currentCount <= 0) {
-                    console.log("⚠️ Cannot dislike - count is already 0");
-                    return;
-                }
+                // DISLIKE
+                if (currentCount <= 0) return;
                 const newLiked = likedPosts.filter(p => p !== id);
                 localStorage.setItem('liked_posts', JSON.stringify(newLiked));
                 this.classList.remove('liked');
                 icon.className = 'far fa-heart';
                 countSpan.textContent = currentCount - 1;
-                try {
-                    await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
-                    console.log("✅ Disliked - count:", currentCount - 1);
-                } catch (err) {
-                    console.error("❌ Error:", err);
-                    this.classList.add('liked');
-                    icon.className = 'fas fa-heart';
-                    countSpan.textContent = currentCount;
-                    likedPosts.push(id);
-                    localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
-                }
+                await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
             } else {
+                // LIKE
                 likedPosts.push(id);
                 localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
                 this.classList.add('liked');
                 icon.className = 'fas fa-heart';
                 countSpan.textContent = currentCount + 1;
-                try {
-                    await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
-                    console.log("✅ Liked - count:", currentCount + 1);
-                } catch (err) {
-                    console.error("❌ Error:", err);
-                    this.classList.remove('liked');
-                    icon.className = 'far fa-heart';
-                    countSpan.textContent = currentCount;
-                    const revertLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-                    const index = revertLiked.indexOf(id);
-                    if (index > -1) revertLiked.splice(index, 1);
-                    localStorage.setItem('liked_posts', JSON.stringify(revertLiked));
-                }
+                await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
             }
         });
 
@@ -833,16 +789,9 @@
         document.getElementById('nav-links').classList.toggle('active');
     });
 
-    // ── REFRESH DATA WHEN PAGE BECOMES VISIBLE ──
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) {
-            // Page became visible again — reload data
-            loadPosts();
-        }
-    });
-
     // ── INIT ──
     loadPosts();
     </script>
 </body>
 </html>
+        
