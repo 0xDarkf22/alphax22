@@ -141,17 +141,20 @@
             renderPost(post, postId);
             loadComments(postId);
             
-            // ── REAL-TIME LIKE LISTENER (SYNC WITH BLOG) ──
+            // ── REAL-TIME LIKE LISTENER ──
             if (likeUnsub) likeUnsub();
             likeUnsub = onSnapshot(doc(db, 'posts', postId), (snap) => {
                 if (snap.exists()) {
                     const data = snap.data();
                     const likeCount = document.getElementById('like-count');
                     const likeBtn = document.getElementById('like-btn');
+                    
+                    // Update count from Firestore
                     if (likeCount) {
                         likeCount.textContent = data.likes || 0;
                     }
-                    // Update heart color based on localStorage
+                    
+                    // ── SYNC HEART COLOR FROM localStorage ──
                     const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
                     if (likedPosts.includes(postId)) {
                         likeBtn.classList.add('liked');
@@ -205,54 +208,26 @@
             const id = this.dataset.id;
             const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
             const isCurrentlyLiked = likedPosts.includes(id);
+            let currentCount = parseInt(likeCount.textContent);
             
-            // Toggle like/dislike
+            // ── CHECK localStorage FIRST ──
             if (isCurrentlyLiked) {
-                // ── DISLIKE (Remove like) ──
-                // Remove from localStorage
+                // DISLIKE
+                if (currentCount <= 0) return;
                 const newLiked = likedPosts.filter(p => p !== id);
                 localStorage.setItem('liked_posts', JSON.stringify(newLiked));
-                
-                // Update UI
                 this.classList.remove('liked');
                 this.querySelector('i').className = 'far fa-heart';
-                
-                // Decrement Firestore
-                try {
-                    await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
-                    console.log("✅ Disliked (like removed)");
-                } catch (err) {
-                    console.error("❌ Error:", err);
-                    // Revert UI if failed
-                    this.classList.add('liked');
-                    this.querySelector('i').className = 'fas fa-heart';
-                    likedPosts.push(id);
-                    localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
-                }
+                likeCount.textContent = currentCount - 1;
+                await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
             } else {
-                // ── LIKE ──
-                // Add to localStorage
+                // LIKE
                 likedPosts.push(id);
                 localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
-                
-                // Update UI
                 this.classList.add('liked');
                 this.querySelector('i').className = 'fas fa-heart';
-                
-                // Increment Firestore
-                try {
-                    await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
-                    console.log("✅ Liked");
-                } catch (err) {
-                    console.error("❌ Error:", err);
-                    // Revert UI if failed
-                    this.classList.remove('liked');
-                    this.querySelector('i').className = 'far fa-heart';
-                    const revertLiked = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-                    const index = revertLiked.indexOf(id);
-                    if (index > -1) revertLiked.splice(index, 1);
-                    localStorage.setItem('liked_posts', JSON.stringify(revertLiked));
-                }
+                likeCount.textContent = currentCount + 1;
+                await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
             }
         });
 
