@@ -265,13 +265,14 @@ function escapeHtml(text) {
                 const div = document.createElement('div');
                 div.className = 'comment-item';
                 div.innerHTML = `
-                    <div class="comment-avatar">${(comment.name || 'A')[0].toUpperCase()}</div>
-                    <div>
-                        <span class="comment-author">${comment.name || 'Anonymous'}</span>
-                        <span class="comment-time">${comment.createdAt ? new Date(comment.createdAt.toDate()).toLocaleDateString() : 'Just now'}</span>
-                        <p class="comment-text">${comment.text}</p>
-                    </div>
-                `;
+    <div class="comment-avatar">${(comment.name || 'A')[0].toUpperCase()}</div>
+    <div>
+        <span class="comment-author">${escapeHtml(comment.name || 'Anonymous')}</span>
+        <span class="comment-time">${comment.createdAt ? new Date(comment.createdAt.toDate()).toLocaleDateString() : 'Just now'}</span>
+        <p class="comment-text">${escapeHtml(comment.text)}</p>
+    </div>
+`;
+                
                 list.appendChild(div);
             });
         });
