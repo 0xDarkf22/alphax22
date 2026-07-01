@@ -421,7 +421,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
         getFirestore, collection, doc, updateDoc, increment, 
-        query, orderBy, onSnapshot
+        query, orderBy, onSnapshot, getDocs
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -450,14 +450,6 @@
     let pinnedPost = null;
     const PINNED_TITLE = "Whoami - a 17-year old cybersecurity researcher";
 
-    // ── XSS PROTECTION ──
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
     function buildPinnedPost(post, id) {
         const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
         const isLiked = likedPosts.includes(id);
@@ -474,13 +466,13 @@
                 <div class="post-avatar">A</div>
                 <div>
                     <div style="font-weight:700;">AlphaX</div>
-                    <div style="color:var(--text-muted);font-size:0.8rem;">${escapeHtml(post.category || 'Misc')}</div>
+                    <div style="color:var(--text-muted);font-size:0.8rem;">${post.category || 'Misc'}</div>
                 </div>
             </div>
-            <div class="post-title">${escapeHtml(post.title)}</div>
-            <div class="post-excerpt">${escapeHtml(post.excerpt || post.content?.substring(0, 200) + '...' || '')}</div>
-            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${escapeHtml(post.title)}" loading="lazy"></div>` : ''}
-            <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${escapeHtml(t)}</span>`).join('')}</div>
+            <div class="post-title" onclick="window.location.href='blog-post.html?id=${id}'">${post.title}</div>
+            <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 200) + '...' || ''}</div>
+            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
+            <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
             <div class="post-actions">
                 <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
                     <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
@@ -541,13 +533,13 @@
                 <div class="post-avatar">A</div>
                 <div>
                     <div style="font-weight:700;">AlphaX</div>
-                    <div style="color:var(--text-muted);font-size:0.8rem;">${escapeHtml(post.category || 'Misc')}</div>
+                    <div style="color:var(--text-muted);font-size:0.8rem;">${post.category || 'Misc'}</div>
                 </div>
             </div>
-            <div class="post-title">${escapeHtml(post.title)}</div>
-            <div class="post-excerpt">${escapeHtml(post.excerpt || post.content?.substring(0, 150) + '...' || '')}</div>
-            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${escapeHtml(post.title)}" loading="lazy"></div>` : ''}
-            <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${escapeHtml(t)}</span>`).join('')}</div>
+            <div class="post-title" onclick="window.location.href='blog-post.html?id=${id}'">${post.title}</div>
+            <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 150) + '...' || ''}</div>
+            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
+            <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
             <div class="post-actions">
                 <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
                     <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
@@ -596,18 +588,15 @@
     let postsUnsub = null;
 
     function loadPosts() {
-        console.log("🔍 loadPosts() called...");
         const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
         
         if (postsUnsub) postsUnsub();
         postsUnsub = onSnapshot(q, (snapshot) => {
-            console.log("📦 onSnapshot triggered! Size:", snapshot.size);
             allPosts = [];
             pinnedPost = null;
 
             snapshot.forEach(doc => {
                 const post = { ...doc.data(), id: doc.id };
-                console.log("📄 Post found:", post.title);
                 if (post.title && post.title.trim() === PINNED_TITLE) {
                     pinnedPost = post;
                 } else {
@@ -615,22 +604,15 @@
                 }
             });
 
-            console.log("📊 All posts count:", allPosts.length);
-            currentPage = 1;
             applyFiltersAndSort();
-        }, (error) => {
-            console.error("❌ Firestore error:", error);
         });
     }
 
     function applyFiltersAndSort() {
-        console.log("🔍 applyFiltersAndSort() called");
         filteredPosts = allPosts.filter(post => {
             if (currentFilter === 'all') return true;
             return (post.category || 'misc').toLowerCase() === currentFilter;
         });
-
-        console.log("📊 Filtered posts:", filteredPosts.length);
 
         if (currentSort === 'popular') {
             filteredPosts.sort((a, b) => (b.likes || 0) - (a.likes || 0));
@@ -643,7 +625,6 @@
         }
 
         totalPosts = filteredPosts.length;
-        console.log("📊 totalPosts:", totalPosts);
         
         const maxPage = Math.ceil(totalPosts / POSTS_PER_PAGE);
         if (currentPage > maxPage && maxPage > 0) {
@@ -655,12 +636,10 @@
     }
 
     function renderPage(page) {
-        console.log("🔍 renderPage() called, page:", page);
         currentPage = page;
         const start = (page - 1) * POSTS_PER_PAGE;
         const end = start + POSTS_PER_PAGE;
         const pagePosts = filteredPosts.slice(start, end);
-        console.log("📊 pagePosts count:", pagePosts.length);
 
         feed.innerHTML = '';
 
