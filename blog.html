@@ -23,7 +23,7 @@
             align-items: center;
             height: 80px;
         }
-        .logo a { font-size: 1.5rem; font-weight: 700; color: var(--text-main); text-decoration: none; }
+        .logo a { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
         .nav-links { display: flex; gap: 2rem; list-style: none; }
         .nav-link { font-weight: 600; color: var(--text-muted); text-decoration: none; transition: 0.3s; }
         .nav-link:hover, .nav-link.active { color: var(--accent-color); }
@@ -421,7 +421,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
         getFirestore, collection, doc, updateDoc, increment, 
-        query, orderBy, onSnapshot, getDocs
+        query, orderBy, onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -430,8 +430,7 @@
         projectId: "alphax22",
         storageBucket: "alphax22.firebasestorage.app",
         messagingSenderId: "564241919435",
-        appId: "1:564241919435:web:a0146fd9a65f32a1125a4e",
-        measurementId: "G-F6GW3R1WMP"
+        appId: "1:564241919435:web:a0146fd9a65f32a1125a4e"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -450,6 +449,7 @@
     let pinnedPost = null;
     const PINNED_TITLE = "Whoami - a 17-year old cybersecurity researcher";
 
+    // ── BUILD PINNED POST ──
     function buildPinnedPost(post, id) {
         const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
         const isLiked = likedPosts.includes(id);
@@ -493,24 +493,33 @@
             }
         });
 
+        // ── LIKE / DISLIKE ──
         const likeBtn = div.querySelector('.like-btn');
         likeBtn.addEventListener('click', async function(e) {
             e.stopPropagation();
             const id = this.dataset.id;
-            let likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+            const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
             const isCurrentlyLiked = likedPosts.includes(id);
-
+            const countSpan = this.querySelector('.like-count');
+            const icon = this.querySelector('i');
+            let currentCount = parseInt(countSpan.textContent);
+ // ── CHECK localStorage FIRST ──
             if (isCurrentlyLiked) {
-                likedPosts = likedPosts.filter(p => p !== id);
-                localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
+                // DISLIKE
+                if (currentCount <= 0) return;
+                const newLiked = likedPosts.filter(p => p !== id);
+                localStorage.setItem('liked_posts', JSON.stringify(newLiked));
                 this.classList.remove('liked');
-                this.querySelector('i').className = 'far fa-heart';
+                icon.className = 'far fa-heart';
+                countSpan.textContent = currentCount - 1;
                 await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
             } else {
+                // LIKE
                 likedPosts.push(id);
                 localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
                 this.classList.add('liked');
-                this.querySelector('i').className = 'fas fa-heart';
+                icon.className = 'fas fa-heart';
+                countSpan.textContent = currentCount + 1;
                 await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
             }
         });
@@ -518,6 +527,7 @@
         return div;
     }
 
+    // ── BUILD POST CARD ──
     function buildPostCard(post, id) {
         const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
         const isLiked = likedPosts.includes(id);
@@ -560,24 +570,34 @@
             }
         });
 
+        // ── LIKE / DISLIKE ──
         const likeBtn = card.querySelector('.like-btn');
         likeBtn.addEventListener('click', async function(e) {
             e.stopPropagation();
             const id = this.dataset.id;
-            let likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+            const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
             const isCurrentlyLiked = likedPosts.includes(id);
+            const countSpan = this.querySelector('.like-count');
+            const icon = this.querySelector('i');
+            let currentCount = parseInt(countSpan.textContent);
 
+            // ── CHECK localStorage FIRST ──
             if (isCurrentlyLiked) {
-                likedPosts = likedPosts.filter(p => p !== id);
-                localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
+                // DISLIKE
+                if (currentCount <= 0) return;
+                const newLiked = likedPosts.filter(p => p !== id);
+                localStorage.setItem('liked_posts', JSON.stringify(newLiked));
                 this.classList.remove('liked');
-                this.querySelector('i').className = 'far fa-heart';
+                icon.className = 'far fa-heart';
+                countSpan.textContent = currentCount - 1;
                 await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
             } else {
+                // LIKE
                 likedPosts.push(id);
                 localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
                 this.classList.add('liked');
-                this.querySelector('i').className = 'fas fa-heart';
+                icon.className = 'fas fa-heart';
+                countSpan.textContent = currentCount + 1;
                 await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
             }
         });
@@ -585,6 +605,7 @@
         return card;
     }
 
+    // ── LOAD POSTS WITH REAL-TIME SYNC ──
     let postsUnsub = null;
 
     function loadPosts() {
@@ -608,6 +629,7 @@
         });
     }
 
+    // ── APPLY FILTERS & SORT ──
     function applyFiltersAndSort() {
         filteredPosts = allPosts.filter(post => {
             if (currentFilter === 'all') return true;
@@ -625,16 +647,11 @@
         }
 
         totalPosts = filteredPosts.length;
-        
-        const maxPage = Math.ceil(totalPosts / POSTS_PER_PAGE);
-        if (currentPage > maxPage && maxPage > 0) {
-            currentPage = 1;
-        }
-        
-        renderPage(currentPage);
+        renderPage(1);
         renderPagination();
     }
 
+    // ── RENDER PAGE ──
     function renderPage(page) {
         currentPage = page;
         const start = (page - 1) * POSTS_PER_PAGE;
@@ -662,6 +679,7 @@
         }
     }
 
+    // ── RENDER PAGINATION ──
     function renderPagination() {
         const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
         pagination.innerHTML = '';
@@ -731,26 +749,27 @@
         pagination.appendChild(nextBtn);
     }
 
+    // ── FILTER BUTTONS ──
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             currentFilter = this.dataset.filter;
-            currentPage = 1;
             applyFiltersAndSort();
         });
     });
 
+    // ── SORT BUTTONS ──
     document.querySelectorAll('.sort-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             currentSort = this.dataset.sort;
-            currentPage = 1;
             applyFiltersAndSort();
         });
     });
 
+    // ── THEME TOGGLE ──
     const themeToggle = document.getElementById('theme-toggle');
     const html = document.documentElement;
     const saved = localStorage.getItem('theme') || 'dark';
@@ -764,10 +783,12 @@
         themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
     });
 
+    // ── MOBILE NAV ──
     document.getElementById('hamburger').addEventListener('click', () => {
         document.getElementById('nav-links').classList.toggle('active');
     });
 
+    // ── INIT ──
     loadPosts();
     </script>
 </body>
