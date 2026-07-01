@@ -424,15 +424,16 @@
         query, orderBy, onSnapshot, getDocs
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAeYGzHvgOC8mQGI-5dc16I9bBRez_LAcc",
-        authDomain: "alphax22.firebaseapp.com",
-        projectId: "alphax22",
-        storageBucket: "alphax22.firebasestorage.app",
-        messagingSenderId: "564241919435",
-        appId: "1:564241919435:web:a0146fd9a65f32a1125a4e",
-        measurementId: "G-F6GW3R1WMP"
-    };
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAeYGzHvgOC8mQGI-5dc16I9BbREz_LAcc",
+  authDomain: "alphax22.firebaseapp.com",
+  projectId: "alphax22",
+  storageBucket: "alphax22.firebasestorage.app",
+  messagingSenderId: "564241919435",
+  appId: "1:564241919435:web:a0146fda965f32a1125a4e",
+  measurementId: "G-F6GW3R1WMP"
+};
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
