@@ -421,19 +421,18 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
         getFirestore, collection, doc, updateDoc, increment, 
-        query, orderBy, onSnapshot, getDocs
+        query, orderBy, onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAeYGzHvgOC8mQGI-5dc16I9BbREz_LAcc",
-  authDomain: "alphax22.firebaseapp.com",
-  projectId: "alphax22",
-  storageBucket: "alphax22.firebasestorage.app",
-  messagingSenderId: "564241919435",
-  appId: "1:564241919435:web:a0146fda965f32a1125a4e",
-  measurementId: "G-F6GW3R1WMP"
-};
+    const firebaseConfig = {
+        apiKey: "AIzaSyAeYGzHvgOC8mQGI-5dc16I9bBRez_LAcc",
+        authDomain: "alphax22.firebaseapp.com",
+        projectId: "alphax22",
+        storageBucket: "alphax22.firebasestorage.app",
+        messagingSenderId: "564241919435",
+        appId: "1:564241919435:web:a0146fd9a65f32a1125a4e",
+        measurementId: "G-F6GW3R1WMP"
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -451,6 +450,14 @@ const firebaseConfig = {
     let pinnedPost = null;
     const PINNED_TITLE = "Whoami - a 17-year old cybersecurity researcher";
 
+    // ── XSS PROTECTION ──
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
     function buildPinnedPost(post, id) {
         const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
         const isLiked = likedPosts.includes(id);
@@ -467,13 +474,13 @@ const firebaseConfig = {
                 <div class="post-avatar">A</div>
                 <div>
                     <div style="font-weight:700;">AlphaX</div>
-                    <div style="color:var(--text-muted);font-size:0.8rem;">${post.category || 'Misc'}</div>
+                    <div style="color:var(--text-muted);font-size:0.8rem;">${escapeHtml(post.category || 'Misc')}</div>
                 </div>
             </div>
-            <div class="post-title" onclick="window.location.href='blog-post.html?id=${id}'">${post.title}</div>
-            <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 200) + '...' || ''}</div>
-            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
-            <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
+            <div class="post-title">${escapeHtml(post.title)}</div>
+            <div class="post-excerpt">${escapeHtml(post.excerpt || post.content?.substring(0, 200) + '...' || '')}</div>
+            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${escapeHtml(post.title)}" loading="lazy"></div>` : ''}
+            <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${escapeHtml(t)}</span>`).join('')}</div>
             <div class="post-actions">
                 <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
                     <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
@@ -534,13 +541,13 @@ const firebaseConfig = {
                 <div class="post-avatar">A</div>
                 <div>
                     <div style="font-weight:700;">AlphaX</div>
-                    <div style="color:var(--text-muted);font-size:0.8rem;">${post.category || 'Misc'}</div>
+                    <div style="color:var(--text-muted);font-size:0.8rem;">${escapeHtml(post.category || 'Misc')}</div>
                 </div>
             </div>
-            <div class="post-title" onclick="window.location.href='blog-post.html?id=${id}'">${post.title}</div>
-            <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 150) + '...' || ''}</div>
-            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
-            <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
+            <div class="post-title">${escapeHtml(post.title)}</div>
+            <div class="post-excerpt">${escapeHtml(post.excerpt || post.content?.substring(0, 150) + '...' || '')}</div>
+            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${escapeHtml(post.title)}" loading="lazy"></div>` : ''}
+            <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${escapeHtml(t)}</span>`).join('')}</div>
             <div class="post-actions">
                 <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
                     <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
@@ -718,342 +725,6 @@ const firebaseConfig = {
             btn.textContent = i;
             if (i === currentPage) btn.classList.add('active');
             btn.addEventListener('click', () => { renderPage(i); renderPagination(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
-            pagination.appendChild(btn);
-        }
-
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                const dots = document.createElement('button');
-                dots.textContent = '…';
-                dots.disabled = true;
-                pagination.appendChild(dots);
-            }
-            const lastBtn = document.createElement('button');
-            lastBtn.textContent = totalPages;
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { 
-        getFirestore, collection, doc, updateDoc, increment, 
-        query, orderBy, onSnapshot
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAeYGzHvgOC8mQGI-5dc16I9BbREz_LAcc",
-  authDomain: "alphax22.firebaseapp.com",
-  projectId: "alphax22",
-  storageBucket: "alphax22.firebasestorage.app",
-  messagingSenderId: "564241919435",
-  appId: "1:564241919435:web:a0146fda965f32a1125a4e",
-  measurementId: "G-F6GW3R1WMP"
-};
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const feed = document.getElementById('posts-feed');
-    const pagination = document.getElementById('pagination');
-
-    let currentFilter = 'all';
-    let currentSort = 'recent';
-    let currentPage = 1;
-    let totalPosts = 0;
-    const POSTS_PER_PAGE = 6;
-    let allPosts = [];
-    let filteredPosts = [];
-    let pinnedPost = null;
-    const PINNED_TITLE = "Whoami - a 17-year old cybersecurity researcher";
-
-    function buildPinnedPost(post, id) {
-        const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-        const isLiked = likedPosts.includes(id);
-        const likeCount = post.likes || 0;
-        
-        const div = document.createElement('div');
-        div.className = 'pinned-post';
-        div.dataset.category = post.category || 'misc';
-        div.dataset.postId = id;
-
-        div.innerHTML = `
-            <span class="pinned-badge">📌 PINNED</span>
-            <div class="post-header">
-                <div class="post-avatar">A</div>
-                <div>
-                    <div style="font-weight:700;">AlphaX</div>
-                    <div style="color:var(--text-muted);font-size:0.8rem;">${post.category || 'Misc'}</div>
-                </div>
-            </div>
-            <div class="post-title">${post.title}</div>
-            <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 200) + '...' || ''}</div>
-            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
-            <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
-            <div class="post-actions">
-                <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
-                    <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
-                    <span class="like-count">${likeCount}</span>
-                </button>
-                <button class="comment-btn">
-                    <i class="far fa-comment"></i> ${post.commentCount || 0}
-                </button>
-                <button class="share-btn">
-                    <i class="fas fa-share-alt"></i>
-                </button>
-            </div>
-        `;
-
-        div.addEventListener('click', (e) => {
-            if (!e.target.closest('button')) {
-                window.location.href = `blog-post.html?id=${id}`;
-            }
-        });
-
-        div.querySelector('.comment-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            window.location.href = `blog-post.html?id=${id}`;
-        });
-
-        div.querySelector('.share-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            navigator.clipboard.writeText(`https://alphax22.web.app/blog-post.html?id=${id}`);
-            alert('Link copied to clipboard!');
-        });
-
-        const likeBtn = div.querySelector('.like-btn');
-        likeBtn.addEventListener('click', async function(e) {
-            e.stopPropagation();
-            const id = this.dataset.id;
-            let likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-            const isCurrentlyLiked = likedPosts.includes(id);
-
-            if (isCurrentlyLiked) {
-                likedPosts = likedPosts.filter(p => p !== id);
-                localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
-                this.classList.remove('liked');
-                this.querySelector('i').className = 'far fa-heart';
-                await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
-            } else {
-                likedPosts.push(id);
-                localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
-                this.classList.add('liked');
-                this.querySelector('i').className = 'fas fa-heart';
-                await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
-            }
-        });
-
-        return div;
-    }
-
-    function buildPostCard(post, id) {
-        const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-        const isLiked = likedPosts.includes(id);
-        const likeCount = post.likes || 0;
-        
-        const card = document.createElement('div');
-        card.className = 'post-card';
-        card.dataset.category = post.category || 'misc';
-        card.dataset.postId = id;
-
-        card.innerHTML = `
-            <div class="post-header">
-                <div class="post-avatar">A</div>
-                <div>
-                    <div style="font-weight:700;">AlphaX</div>
-                    <div style="color:var(--text-muted);font-size:0.8rem;">${post.category || 'Misc'}</div>
-                </div>
-            </div>
-            <div class="post-title">${post.title}</div>
-            <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 150) + '...' || ''}</div>
-            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
-            <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
-            <div class="post-actions">
-                <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
-                    <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
-                    <span class="like-count">${likeCount}</span>
-                </button>
-                <button class="comment-btn">
-                    <i class="far fa-comment"></i> ${post.commentCount || 0}
-                </button>
-                <button class="share-btn">
-                    <i class="fas fa-share-alt"></i>
-                </button>
-            </div>
-        `;
-
-        card.addEventListener('click', (e) => {
-            if (!e.target.closest('button')) {
-                window.location.href = `blog-post.html?id=${id}`;
-            }
-        });
-
-        card.querySelector('.comment-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            window.location.href = `blog-post.html?id=${id}`;
-        });
-
-        card.querySelector('.share-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            navigator.clipboard.writeText(`https://alphax22.web.app/blog-post.html?id=${id}`);
-            alert('Link copied to clipboard!');
-        });
-
-        const likeBtn = card.querySelector('.like-btn');
-        likeBtn.addEventListener('click', async function(e) {
-            e.stopPropagation();
-            const id = this.dataset.id;
-            let likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
-            const isCurrentlyLiked = likedPosts.includes(id);
-
-            if (isCurrentlyLiked) {
-                likedPosts = likedPosts.filter(p => p !== id);
-                localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
-                this.classList.remove('liked');
-                this.querySelector('i').className = 'far fa-heart';
-                await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
-            } else {
-                likedPosts.push(id);
-                localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
-                this.classList.add('liked');
-                this.querySelector('i').className = 'fas fa-heart';
-                await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
-            }
-        });
-
-        return card;
-    }
-
-    let postsUnsub = null;
-
-    function loadPosts() {
-        console.log("🔍 loadPosts() called...");
-        const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-        
-        if (postsUnsub) postsUnsub();
-        postsUnsub = onSnapshot(q, (snapshot) => {
-            console.log("📦 onSnapshot triggered! Size:", snapshot.size);
-            allPosts = [];
-            pinnedPost = null;
-
-            snapshot.forEach(doc => {
-                const post = { ...doc.data(), id: doc.id };
-                if (post.title && post.title.trim() === PINNED_TITLE) {
-                    pinnedPost = post;
-                } else {
-                    allPosts.push(post);
-                }
-            });
-
-            currentPage = 1;
-            applyFiltersAndSort();
-        }, (error) => {
-            console.error("❌ Firestore error:", error);
-            feed.innerHTML = `
-                <div class="empty-state" style="color: #ef4444;">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>Database Error: ${error.message}</p>
-                    <p style="font-size: 0.85rem; color: var(--text-muted);">
-                        If it mentions a missing index, please click the link shown in your browser's inspect console (F12) to generate it.
-                    </p>
-                </div>`;
-        });
-    }
-
-    function applyFiltersAndSort() {
-        filteredPosts = allPosts.filter(post => {
-            if (currentFilter === 'all') return true;
-            return (post.category || 'misc').toLowerCase() === currentFilter;
-        });
-
-        if (currentSort === 'popular') {
-            filteredPosts.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-        } else {
-            filteredPosts.sort((a, b) => {
-                // Safeguard against documents with malformed or missing Timestamp entries
-                const dateA = (a.createdAt && typeof a.createdAt.toDate === 'function') ? a.createdAt.toDate().getTime() : 0;
-                const dateB = (b.createdAt && typeof b.createdAt.toDate === 'function') ? b.createdAt.toDate().getTime() : 0;
-                return dateB - dateA;
-            });
-        }
-
-        totalPosts = filteredPosts.length;
-        
-        const maxPage = Math.ceil(totalPosts / POSTS_PER_PAGE);
-        if (currentPage > maxPage && maxPage > 0) {
-            currentPage = 1;
-        }
-        
-        renderPage(currentPage);
-        renderPagination();
-    }
-
-    function renderPage(page) {
-        currentPage = page;
-        const start = (page - 1) * POSTS_PER_PAGE;
-        const end = start + POSTS_PER_PAGE;
-        const pagePosts = filteredPosts.slice(start, end);
-
-        feed.innerHTML = '';
-
-        if (pinnedPost) {
-            feed.appendChild(buildPinnedPost(pinnedPost, pinnedPost.id));
-        }
-
-        if (pagePosts.length === 0 && !pinnedPost) {
-            feed.innerHTML = `<div class="empty-state"><i class="fas fa-terminal"></i><p>No posts found.</p></div>`;
-            return;
-        }
-
-        if (pagePosts.length > 0) {
-            const grid = document.createElement('div');
-            grid.className = 'posts-grid';
-            pagePosts.forEach(post => {
-                grid.appendChild(buildPostCard(post, post.id));
-            });
-            feed.appendChild(grid);
-        }
-    }
-
-    function renderPagination() {
-        const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
-        pagination.innerHTML = '';
-
-        if (totalPages <= 1) return;
-
-        const prevBtn = document.createElement('button');
-        prevBtn.textContent = '‹';
-        prevBtn.disabled = currentPage === 1;
-        prevBtn.addEventListener('click', () => {
-            if (currentPage > 1) renderPage(currentPage - 1);
-            renderPagination();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-        pagination.appendChild(prevBtn);
-
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, currentPage + 2);
-
-        if (endPage - startPage < 4) {
-            if (startPage > 1) startPage = Math.max(1, endPage - 4);
-            if (endPage < totalPages) endPage = Math.min(totalPages, startPage + 4);
-        }
-
-        if (startPage > 1) {
-            const firstBtn = document.createElement('button');
-            firstBtn.textContent = '1';
-            firstBtn.addEventListener('click', () => { renderPage(1); renderPagination(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
-            pagination.appendChild(firstBtn);
-            if (startPage > 2) {
-                const dots = document.createElement('button');
-                dots.textContent = '…';
-                dots.disabled = true;
-                pagination.appendChild(dots);
-            }
-        }
-
-        for (let i = startPage; i <= endPage; i++) {
-            const btn = document.createElement('button');
-            btn.textContent = i;
-            if (i === currentPage) btn.classList.add('active');
-            btn.addEventListener('click', () => { btn.innerText = i; renderPage(i); renderPagination(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
             pagination.appendChild(btn);
         }
 
