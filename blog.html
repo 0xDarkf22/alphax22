@@ -417,7 +417,7 @@
 
     <footer><p>© 2026 AlphaX. All rights reserved.</p></footer>
 
-     <script type="module">
+    <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
         getFirestore, collection, doc, updateDoc, increment, 
@@ -603,6 +603,7 @@
                 }
             });
 
+            currentPage = 1;
             applyFiltersAndSort();
         });
     }
@@ -624,6 +625,12 @@
         }
 
         totalPosts = filteredPosts.length;
+        
+        const maxPage = Math.ceil(totalPosts / POSTS_PER_PAGE);
+        if (currentPage > maxPage && maxPage > 0) {
+            currentPage = 1;
+        }
+        
         renderPage(currentPage);
         renderPagination();
     }
