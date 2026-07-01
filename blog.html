@@ -424,6 +424,14 @@
         query, orderBy, onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+    // ── XSS PROTECTION ──
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
     const firebaseConfig = {
         apiKey: "AIzaSyAeYGzHvgOC8mQGI-5dc16I9bBRez_LAcc",
         authDomain: "alphax22.firebaseapp.com",
@@ -466,13 +474,13 @@
                 <div class="post-avatar">A</div>
                 <div>
                     <div style="font-weight:700;">AlphaX</div>
-                    <div style="color:var(--text-muted);font-size:0.8rem;">${post.category || 'Misc'}</div>
+                    <div style="color:var(--text-muted);font-size:0.8rem;">${escapeHtml(post.category || 'Misc')}</div>
                 </div>
             </div>
-            <div class="post-title" onclick="window.location.href='blog-post.html?id=${id}'">${post.title}</div>
-            <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 200) + '...' || ''}</div>
-            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
-            <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
+            <div class="post-title" onclick="window.location.href='blog-post.html?id=${id}'">${escapeHtml(post.title)}</div>
+            <div class="post-excerpt">${escapeHtml(post.excerpt || post.content?.substring(0, 200) + '...' || '')}</div>
+            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${escapeHtml(post.title)}" loading="lazy"></div>` : ''}
+            <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${escapeHtml(t)}</span>`).join('')}</div>
             <div class="post-actions">
                 <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
                     <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
@@ -493,7 +501,6 @@
             }
         });
 
-        // ── LIKE / DISLIKE ──
         const likeBtn = div.querySelector('.like-btn');
         likeBtn.addEventListener('click', async function(e) {
             e.stopPropagation();
@@ -503,9 +510,8 @@
             const countSpan = this.querySelector('.like-count');
             const icon = this.querySelector('i');
             let currentCount = parseInt(countSpan.textContent);
- // ── CHECK localStorage FIRST ──
+
             if (isCurrentlyLiked) {
-                // DISLIKE
                 if (currentCount <= 0) return;
                 const newLiked = likedPosts.filter(p => p !== id);
                 localStorage.setItem('liked_posts', JSON.stringify(newLiked));
@@ -514,7 +520,6 @@
                 countSpan.textContent = currentCount - 1;
                 await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
             } else {
-                // LIKE
                 likedPosts.push(id);
                 localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
                 this.classList.add('liked');
@@ -543,13 +548,13 @@
                 <div class="post-avatar">A</div>
                 <div>
                     <div style="font-weight:700;">AlphaX</div>
-                    <div style="color:var(--text-muted);font-size:0.8rem;">${post.category || 'Misc'}</div>
+                    <div style="color:var(--text-muted);font-size:0.8rem;">${escapeHtml(post.category || 'Misc')}</div>
                 </div>
             </div>
-            <div class="post-title" onclick="window.location.href='blog-post.html?id=${id}'">${post.title}</div>
-            <div class="post-excerpt">${post.excerpt || post.content?.substring(0, 150) + '...' || ''}</div>
-            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}" loading="lazy"></div>` : ''}
-            <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('')}</div>
+            <div class="post-title" onclick="window.location.href='blog-post.html?id=${id}'">${escapeHtml(post.title)}</div>
+            <div class="post-excerpt">${escapeHtml(post.excerpt || post.content?.substring(0, 150) + '...' || '')}</div>
+            ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="${escapeHtml(post.title)}" loading="lazy"></div>` : ''}
+            <div class="post-tags">${(post.tags || []).map(t => `<span class="post-tag">${escapeHtml(t)}</span>`).join('')}</div>
             <div class="post-actions">
                 <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${id}">
                     <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
@@ -570,7 +575,6 @@
             }
         });
 
-        // ── LIKE / DISLIKE ──
         const likeBtn = card.querySelector('.like-btn');
         likeBtn.addEventListener('click', async function(e) {
             e.stopPropagation();
@@ -581,9 +585,7 @@
             const icon = this.querySelector('i');
             let currentCount = parseInt(countSpan.textContent);
 
-            // ── CHECK localStorage FIRST ──
             if (isCurrentlyLiked) {
-                // DISLIKE
                 if (currentCount <= 0) return;
                 const newLiked = likedPosts.filter(p => p !== id);
                 localStorage.setItem('liked_posts', JSON.stringify(newLiked));
@@ -592,7 +594,6 @@
                 countSpan.textContent = currentCount - 1;
                 await updateDoc(doc(db, 'posts', id), { likes: increment(-1) });
             } else {
-                // LIKE
                 likedPosts.push(id);
                 localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
                 this.classList.add('liked');
@@ -605,7 +606,6 @@
         return card;
     }
 
-    // ── LOAD POSTS WITH REAL-TIME SYNC ──
     let postsUnsub = null;
 
     function loadPosts() {
@@ -629,7 +629,6 @@
         });
     }
 
-    // ── APPLY FILTERS & SORT ──
     function applyFiltersAndSort() {
         filteredPosts = allPosts.filter(post => {
             if (currentFilter === 'all') return true;
@@ -647,11 +646,10 @@
         }
 
         totalPosts = filteredPosts.length;
-        renderPage(1);
+        renderPage(1);  // ✅ ALWAYS RESET TO PAGE 1
         renderPagination();
     }
 
-    // ── RENDER PAGE ──
     function renderPage(page) {
         currentPage = page;
         const start = (page - 1) * POSTS_PER_PAGE;
@@ -679,7 +677,6 @@
         }
     }
 
-    // ── RENDER PAGINATION ──
     function renderPagination() {
         const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
         pagination.innerHTML = '';
@@ -749,7 +746,6 @@
         pagination.appendChild(nextBtn);
     }
 
-    // ── FILTER BUTTONS ──
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -759,7 +755,6 @@
         });
     });
 
-    // ── SORT BUTTONS ──
     document.querySelectorAll('.sort-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
@@ -769,7 +764,6 @@
         });
     });
 
-    // ── THEME TOGGLE ──
     const themeToggle = document.getElementById('theme-toggle');
     const html = document.documentElement;
     const saved = localStorage.getItem('theme') || 'dark';
@@ -783,12 +777,10 @@
         themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
     });
 
-    // ── MOBILE NAV ──
     document.getElementById('hamburger').addEventListener('click', () => {
         document.getElementById('nav-links').classList.toggle('active');
     });
 
-    // ── INIT ──
     loadPosts();
     </script>
 </body>
