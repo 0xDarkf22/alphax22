@@ -517,7 +517,6 @@
         return div;
     }
 
-    
     function buildPostCard(post, id) {
         const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
         const isLiked = likedPosts.includes(id);
@@ -625,6 +624,12 @@
         }
 
         totalPosts = filteredPosts.length;
+        
+        const maxPage = Math.ceil(totalPosts / POSTS_PER_PAGE);
+        if (currentPage > maxPage && maxPage > 0) {
+            currentPage = 1;
+        }
+        
         renderPage(currentPage);
         renderPagination();
     }
@@ -764,5 +769,5 @@
 
     loadPosts();
     </script>
-</body>
+    </body>
 </html>
